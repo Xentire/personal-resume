@@ -1,0 +1,79 @@
+import { aboutHighlights, education, profile } from '../../data/resume';
+import { labels, sections } from '../../data/site';
+import { Section } from '../layout/Section';
+
+export function About() {
+  const infoRows: Array<{ label: string; value: string }> = [];
+  const push = (label: string, value: string | null | undefined) => {
+    if (value) infoRows.push({ label, value });
+  };
+  push('姓名', profile.name);
+  push('性别', profile.gender);
+  push('年龄', profile.age ? `${profile.age} 岁` : null);
+  push('求职意向', profile.targetRole);
+  push(labels.email, profile.contacts.email);
+  push(labels.phone, profile.contacts.phone);
+  push('现居', profile.location);
+
+  return (
+    <Section id="about" index={sections.about.index} title={sections.about.title} desc={sections.about.desc}>
+      <div className="grid gap-10 lg:grid-cols-12 lg:gap-10">
+        <div className="lg:col-span-7">
+          <h3 className="label-mono">{labels.basicInfo}</h3>
+          <dl className="mt-3 grid grid-cols-1 gap-x-10 sm:grid-cols-2">
+            {infoRows.map((row) => (
+              <div key={row.label} className="flex items-baseline justify-between gap-4 border-b border-line/80 py-3">
+                <dt className="shrink-0 text-[11px] text-faint">{row.label}</dt>
+                <dd className="truncate text-[13.5px] text-ink" title={row.value}>
+                  {row.value}
+                </dd>
+              </div>
+            ))}
+          </dl>
+
+          <div className="mt-8">
+            <h3 className="label-mono">{labels.education}</h3>
+            <div className="mt-3 space-y-3">
+              {education.map((item) => (
+                <div key={`${item.school}-${item.period}`} className="card px-5 py-4">
+                  <div className="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between">
+                    <p className="text-[15px] text-ink">{item.school}</p>
+                    {item.period ? (
+                      <span className="font-mono text-[11.5px] text-faint">{item.period}</span>
+                    ) : null}
+                  </div>
+                  <p className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-[13px] text-dim">
+                    {[item.degree, item.major].filter(Boolean).join(' · ')}
+                    {item.note ? (
+                      <span className="rounded border border-accent/25 bg-accent/10 px-1.5 py-0.5 font-mono text-[11px] text-accent">
+                        {item.note}
+                      </span>
+                    ) : null}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="lg:col-span-5">
+          <h3 className="label-mono">{labels.highlights}</h3>
+          <ul className="mt-3 space-y-2.5">
+            {aboutHighlights.map((item) => (
+              <li
+                key={item.title}
+                className="card p-5 transition-colors duration-150 hover:border-[#2C3547]"
+              >
+                <div className="flex items-center gap-2">
+                  <span aria-hidden className="h-1 w-1 rounded-full bg-accent" />
+                  <span className="text-[13px] text-ink">{item.title}</span>
+                </div>
+                <p className="mt-2 text-[12.5px] leading-6 text-dim">{item.desc}</p>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </Section>
+  );
+}

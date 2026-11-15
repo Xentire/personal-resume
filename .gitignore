@@ -1,0 +1,19 @@
+node_modules
+dist
+dist-ssr
+*.local
+.DS_Store
+resume-lines.txt
+.dev.log
+*.log
+
+# 依赖重装时的临时备份目录
+.nm_bak
+.nm_bak.*
+.tools
+
+# WorkBuddy 本地记忆与项目元数据
+.workbuddy
+
+# 本地截图产物
+preview

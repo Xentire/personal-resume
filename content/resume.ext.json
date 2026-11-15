@@ -1,0 +1,158 @@
+{
+  "_comment": "人工维护的扩展内容层。scripts/sync-resume.mjs 只会重写 content/resume.json，不会覆盖本文件，因此技能熟练度、架构图、竞赛细节等增强字段放在这里。修改后刷新页面即可生效。",
+  "about": {
+    "highlights": [
+      {
+        "title": "后端工程",
+        "desc": "以 Java 并发与 Spring 生态为主，能独立完成接口设计、SQL 调优、容器排障与多环境联调。"
+      },
+      {
+        "title": "Agent / RAG",
+        "desc": "用 LangGraph 编排多步决策，落地 SSE 流式链路、HITL 断点恢复与向量 + BM25 混合检索。"
+      },
+      {
+        "title": "工程习惯",
+        "desc": "偏好把效果写进指标：一次通过率、TopK 命中率、首字延迟都要可测量、可回归。"
+      }
+    ]
+  },
+  "skills": [
+    {
+      "group": "后端与框架",
+      "tier": "CORE",
+      "note": "Java 并发与 Spring 生态",
+      "tags": [
+        { "name": "Java 集合与并发", "level": 4, "scene": "问答机器人 · 会话上下文状态" },
+        { "name": "HashMap / ConcurrentHashMap", "level": 4, "scene": "本地缓存选型" },
+        { "name": "线程池 · AQS · CAS", "level": 3, "scene": "DataAgent · Java 侧异步链路" },
+        { "name": "Spring Boot", "level": 4, "scene": "问答机器人 · 服务主框架" },
+        { "name": "MyBatis / MyBatis-Plus", "level": 4, "scene": "问答机器人 · 多条件联查" },
+        { "name": "Spring IOC / AOP", "level": 3, "scene": "知行食光 · 统一鉴权切面" },
+        { "name": "声明式事务", "level": 3, "scene": "知行食光 · 下单扣库存原子性" },
+        { "name": "JVM 内存与 GC", "level": 2, "scene": "线上问题排查" }
+      ]
+    },
+    {
+      "group": "数据与中间件",
+      "tier": "DATA",
+      "note": "存储、缓存与消息",
+      "tags": [
+        { "name": "MySQL 索引与执行计划", "level": 4, "scene": "问答机器人 · 万级会话慢 SQL 优化" },
+        { "name": "事务隔离级别", "level": 3, "scene": "知行食光 · 下单与库存一致性" },
+        { "name": "Redis 缓存穿透/击穿/雪崩", "level": 4, "scene": "问答机器人 · 热点数据缓存" },
+        { "name": "Redis 分布式锁", "level": 3, "scene": "知行食光 · Redisson 库存并发" },
+        { "name": "布隆过滤器", "level": 2, "scene": "缓存穿透前置校验" },
+        { "name": "RabbitMQ", "level": 2, "scene": "服务异步解耦" },
+        { "name": "分库分表 · 主从同步", "level": 2, "scene": "数据量增长后的扩展方案" }
+      ]
+    },
+    {
+      "group": "AI 应用与 Agent",
+      "tier": "AGENT",
+      "note": "编排、协议与流式链路",
+      "tags": [
+        { "name": "LangGraph StateGraph", "level": 4, "scene": "DataAgent · 17 节点决策层" },
+        { "name": "Plan-and-Execute", "level": 3, "scene": "DataAgent · 多步规划路线" },
+        { "name": "ReAct / Reflection", "level": 3, "scene": "DataAgent · 计划与重试环" },
+        { "name": "SSE 流式输出", "level": 4, "scene": "DataAgent / 问答机器人 · Token 级推送" },
+        { "name": "Human-in-the-Loop", "level": 4, "scene": "问答机器人 · 钉钉待办兜底" },
+        { "name": "MCP 协议", "level": 3, "scene": "工具与能力回源接入" },
+        { "name": "Prompt 设计", "level": 3, "scene": "意图识别与澄清追问" },
+        { "name": "Spring AI", "level": 3, "scene": "DataAgent · Embedding / VectorStore" },
+        { "name": "FastAPI", "level": 2, "scene": "决策层对外接口" }
+      ]
+    },
+    {
+      "group": "RAG 与向量检索",
+      "tier": "RAG",
+      "note": "召回、融合与评测",
+      "tags": [
+        { "name": "文档切分策略", "level": 3, "scene": "DataAgent · TextSplitter 切片" },
+        { "name": "向量 + BM25 混合检索", "level": 4, "scene": "DataAgent · ES 双路召回" },
+        { "name": "RRF 融合排序", "level": 4, "scene": "DataAgent · K=60，TopK 61%→79%" },
+        { "name": "ElasticSearch 向量入库", "level": 3, "scene": "DataAgent · 能力回源接口" },
+        { "name": "RAG 评测集设计", "level": 3, "scene": "N=120 评测集，一次通过率 74%→91%" }
+      ]
+    },
+    {
+      "group": "工程工具",
+      "tier": "INFRA",
+      "note": "交付、部署与排障",
+      "tags": [
+        { "name": "Docker", "level": 3, "scene": "DataAgent · 隔离执行 Python" },
+        { "name": "Kubernetes 日志排查", "level": 3, "scene": "问答机器人 · 线上异常定位" },
+        { "name": "Nacos", "level": 3, "scene": "问答机器人 · 注册与配置中心" },
+        { "name": "Git / Linux", "level": 4, "scene": "日常开发与部署" },
+        { "name": "MinIO", "level": 2, "scene": "问答机器人 · 文档流式上传" },
+        { "name": "WebSocket", "level": 3, "scene": "知行食光 · 订单状态推送" }
+      ]
+    }
+  ],
+  "internships": {
+    "智能问答机器人": {
+      "metrics": [
+        { "label": "接入渠道", "value": "2 个" },
+        { "label": "单表数据量级", "value": "万级会话" },
+        { "label": "回复时延", "value": "Token 级" },
+        { "label": "兜底链路", "value": "钉钉待办" }
+      ],
+      "features": [
+        "对接意图识别与 RAG 知识库，搭建「识别 → 检索 → 生成」完整问答链路",
+        "按部门、岗位、角色多属性校验，隔离检索范围与生成内容权限",
+        "封装 OkHttp 实现 SSE 流式对话，Token 级实时推送并回传文档来源",
+        "支持意图系统与 RAGFlow 双模式动态切换，按场景选择应答策略",
+        "解析多轮对话状态，处理意图切换、槽位补全与澄清追问",
+        "实现 Human-in-the-Loop 兜底，无法解答时自动创建钉钉待办通知管理员",
+        "封装 MinIO → WeKnora 流式上传，文件全程服务端不落盘"
+      ],
+      "engineering": [
+        "编写复杂多条件联查 SQL，调整查询条件并新增高频字段索引，完成慢查询优化",
+        "支撑万级会话数据查询与报表导出，覆盖多类企业咨询场景",
+        "通过 K8s 容器日志定位线上业务异常，排查服务间鉴权调用故障",
+        "参与开发、测试多环境构建与发版流程，完成跨服务接口联调验证"
+      ]
+    }
+  },
+  "projects": {
+    "DataAgent": {
+      "architecture": {
+        "caption": "双服务架构：Java 事实层负责权限与执行，Python 决策层负责编排与推理",
+        "mermaid": "flowchart LR\n  U[用户提问] --> GW[\"Java 网关<br/>Reactor + SSE\"]\n  GW --> AG[\"Python 决策层<br/>LangGraph StateGraph\"]\n  AG --> P1[意图理解]\n  P1 --> P2[Schema 发现]\n  P2 --> P3[多步规划]\n  P3 --> EX[SQL / Python 执行]\n  EX --> CK[语义校验]\n  CK --> RP[报告生成]\n  RP --> GW\n  AG -.-> RAG[\"ES 混合检索<br/>向量 + BM25 + RRF\"]\n  EX -.-> DB[(MySQL 只读库)]"
+      }
+    },
+    "知行食光": {
+      "architecture": {
+        "caption": "订单链路：下单 → 扣库存 → WebSocket 状态回推，报表异步导出",
+        "mermaid": "flowchart TB\n  C[\"学生端 / 商家端\"] --> API[\"SpringBoot 服务\"]\n  API --> RD[(Redis 库存锁)]\n  API --> DB[(MySQL 订单)]\n  API --> WS[\"WebSocket<br/>订单状态回推\"]\n  API --> POI[POI 报表导出]"
+      }
+    }
+  },
+  "awards": [
+    {
+      "title": "蓝桥杯",
+      "level": "国家三等奖",
+      "track": "个人赛",
+      "focus": "算法与 Java 工程实践",
+      "note": "全国软件和信息技术专业人才大赛，考察算法实现与工程编码能力。"
+    },
+    {
+      "title": "牛客竞赛",
+      "level": "全国二等奖",
+      "track": "个人赛",
+      "focus": "算法与数据结构",
+      "note": "在线算法竞赛，限时完成多档难度题目，侧重数据结构与复杂度分析。"
+    },
+    {
+      "title": "GPLT 天梯赛",
+      "level": "全国三等奖",
+      "track": "个人赛 · 团队赛",
+      "focus": "算法与协作解题",
+      "note": "团体程序设计天梯赛，按梯队计分，个人赛与团队赛均获奖。"
+    }
+  ],
+  "interests": {
+    "intro": "写代码时的背景音。播放器组件已预留，接入曲目后即可在此播放。",
+    "tags": ["音乐", "技术播客"],
+    "playlist": []
+  }
+}
