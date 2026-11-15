@@ -1,61 +1,62 @@
 /**
- * 站点 UI 文案（导航名、区块副标题、按钮文字）。
- * 只放界面用语，不放任何履历内容——履历一律来自 content/resume.json 与 content/resume.ext.json。
+ * 站点 UI 文案与板块注册表。
+ * 只放界面用语，不放任何履历内容——履历来自 content/resume.json + content/resume.ext.json，
+ * 文章来自 content/posts/ 下的 markdown。
+ *
+ * 加一个板块只改这里的一个数组项：
+ *   { key: 'xxx', title: '标题', desc: '副标题', nav: '导航名' }
+ * 序号 01/02/03… 按数组顺序自动生成，不需要手写；
+ * 导航项也从同一个数组派生，不会出现「加了板块忘了加导航」。
+ * requiresPosts 的板块在没有文章时自动隐藏（导航里也不出现）。
  */
+import { hasPosts } from './posts';
 
 export interface NavItem {
   id: string;
   label: string;
 }
 
-export const navItems: NavItem[] = [
-  { id: 'about', label: '关于我' },
-  { id: 'skills', label: '技能' },
-  { id: 'experience', label: '实习' },
-  { id: 'awards', label: '荣誉' },
-  { id: 'projects', label: '项目' },
-  { id: 'interests', label: '兴趣' },
-  { id: 'contact', label: '联系' },
+interface SectionDef {
+  key: string;
+  title: string;
+  desc?: string;
+  /** 有值才出现在顶部导航里 */
+  nav?: string;
+  /** 依赖 content/posts 有内容才显示 */
+  requiresPosts?: boolean;
+}
+
+const sectionDefs: SectionDef[] = [
+  { key: 'about', title: '关于我', desc: '教育背景与基本资料。', nav: '关于我' },
+  { key: 'skills', title: '专业技能', desc: '按方向分组的标签，标注熟练度与落地场景。', nav: '技能' },
+  { key: 'experience', title: '实习经历', desc: '职责范围、工程量与可验证的结果。', nav: '实习' },
+  { key: 'awards', title: '竞赛荣誉', desc: '算法竞赛与学业表现。', nav: '荣誉' },
+  { key: 'projects', title: '项目作品', desc: '架构取舍与可量化结果。', nav: '项目' },
+  { key: 'notes', title: '个人分享', desc: '技术笔记、踩坑记录与阶段性思考。', nav: '分享', requiresPosts: true },
+  { key: 'interests', title: '兴趣爱好', desc: '工作之外的输入。', nav: '兴趣' },
+  { key: 'contact', title: '联系我', nav: '联系' },
 ];
 
-export const navIds: string[] = navItems.map((item) => item.id);
+export interface SectionMeta {
+  index: string;
+  title: string;
+  desc?: string;
+}
 
-export const sections = {
-  about: {
-    index: '01',
-    title: '关于我',
-    desc: '教育背景与基本资料。',
-  },
-  skills: {
-    index: '02',
-    title: '专业技能',
-    desc: '按方向分组的标签，标注熟练度与落地场景。',
-  },
-  experience: {
-    index: '03',
-    title: '实习经历',
-    desc: '职责范围、工程量与可验证的结果。',
-  },
-  awards: {
-    index: '04',
-    title: '竞赛荣誉',
-    desc: '算法竞赛与学业表现。',
-  },
-  projects: {
-    index: '05',
-    title: '项目作品',
-    desc: '架构取舍与可量化结果。',
-  },
-  interests: {
-    index: '06',
-    title: '兴趣爱好',
-    desc: '工作之外的输入。',
-  },
-  contact: {
-    index: '07',
-    title: '联系我',
-  },
-} as const;
+const visibleDefs = sectionDefs.filter((def) => !def.requiresPosts || hasPosts);
+
+export const sections = Object.fromEntries(
+  visibleDefs.map((def, i) => [
+    def.key,
+    { index: String(i + 1).padStart(2, '0'), title: def.title, desc: def.desc },
+  ])
+) as Record<string, SectionMeta>;
+
+export const navItems: NavItem[] = visibleDefs
+  .filter((def) => Boolean(def.nav))
+  .map((def) => ({ id: def.key, label: def.nav as string }));
+
+export const navIds: string[] = navItems.map((item) => item.id);
 
 export const ui = {
   available: '求职中',
@@ -65,7 +66,7 @@ export const ui = {
   footerDesc: '欢迎就工作机会与技术问题与我联系。',
   footerNavTitle: '页面导航',
   footerAboutTitle: '关于本站',
-  footerAbout: '页面内容由 PDF 简历解析生成，扩展信息存放于 resume.ext.json。',
+  footerAbout: '页面内容由 PDF 简历解析生成，增强字段存放于 resume.ext.json，文章存放于 content/posts/。',
   backToTop: '回到顶部',
   builtWith: 'React · Vite · TailwindCSS',
   levelLegend: [
@@ -82,6 +83,8 @@ export const ui = {
   diagramHint: '可左右滑动查看完整架构图',
   diagramLoading: '渲染中…',
   diagramError: '架构图渲染失败，已回退为源码',
+  postExpand: '展开全文',
+  postCollapse: '收起',
 } as const;
 
 export const labels = {
@@ -99,4 +102,5 @@ export const labels = {
   phone: '电话',
   github: 'GitHub',
   wechat: '微信',
+  postTags: '标签',
 } as const;

@@ -83,6 +83,11 @@ export interface Architecture {
   mermaid: string;
 }
 
+export interface ProjectLink {
+  label: string;
+  href: string;
+}
+
 export interface Project {
   name: string;
   role: string | null;
@@ -93,6 +98,7 @@ export interface Project {
   features: string[];
   metrics: Metric[];
   architecture: Architecture | null;
+  links: ProjectLink[];
 }
 
 export interface AwardItem {
@@ -272,7 +278,19 @@ export const skillTagCount = skillGroups.reduce((sum, group) => sum + group.tags
 const internshipExt = record(ext.internships);
 const projectExt = record(ext.projects);
 
-export const internships: Internship[] = Array.isArray(root.internships)
+const projectLinks = (value: unknown): ProjectLink[] => {
+  if (!Array.isArray(value)) return [];
+  return value
+    .map((entry) => {
+      const row = record(entry);
+      const href = text(row.href);
+      if (!href) return null;
+      return { label: text(row.label) ?? href.replace(/^https?:\/\//, ''), href };
+    })
+    .filter((link): link is ProjectLink => link !== null);
+};
+
+const baseInternships: Internship[] = Array.isArray(root.internships)
   ? root.internships.map((item) => {
       const row = record(item);
       const name = text(row.name);
@@ -294,7 +312,7 @@ export const internships: Internship[] = Array.isArray(root.internships)
     })
   : [];
 
-export const projects: Project[] = Array.isArray(root.projects)
+const baseProjects: Project[] = Array.isArray(root.projects)
   ? root.projects.map((item) => {
       const row = record(item);
       const name = text(row.name) ?? '未命名项目';
@@ -313,9 +331,84 @@ export const projects: Project[] = Array.isArray(root.projects)
         features: overrideFeatures.length ? overrideFeatures : list(row.features),
         metrics: overrideMetrics.length ? overrideMetrics : metrics(row.metrics),
         architecture: mermaid ? { caption: text(arch.caption), mermaid } : null,
+        links: projectLinks(override.links),
       };
     })
   : [];
+
+/** ext 里的 extra 数组：手写全新条目，不依赖 PDF 里有没有 */
+const extraOf = (bag: Record<string, unknown>): unknown[] => (Array.isArray(bag.extra) ? bag.extra : []);
+
+const normalizeExtraProject = (value: unknown): Project | null => {
+  const row = record(value);
+  const name = text(row.name);
+  if (!name) return null;
+  const arch = record(row.architecture);
+  const mermaid = text(arch.mermaid);
+  return {
+    name,
+    role: text(row.role),
+    subtitle: text(row.subtitle),
+    period: text(row.period),
+    stackGroups: stackGroups(row.stackGroups),
+    summary: text(row.summary),
+    features: list(row.features),
+    metrics: metrics(row.metrics),
+    architecture: mermaid ? { caption: text(arch.caption), mermaid } : null,
+    links: projectLinks(row.links),
+  };
+};
+
+const normalizeExtraInternship = (value: unknown): Internship | null => {
+  const row = record(value);
+  const company = text(row.company);
+  if (!company) return null;
+  return {
+    name: text(row.name),
+    company,
+    role: text(row.role),
+    subtitle: text(row.subtitle),
+    period: text(row.period),
+    stackGroups: stackGroups(row.stackGroups),
+    summary: text(row.summary),
+    features: list(row.features),
+    engineering: list(row.engineering),
+    metrics: metrics(row.metrics),
+  };
+};
+
+export const internships: Internship[] = [
+  ...baseInternships,
+  ...extraOf(internshipExt)
+    .map(normalizeExtraInternship)
+    .filter((item): item is Internship => item !== null),
+];
+
+export const projects: Project[] = [
+  ...baseProjects,
+  ...extraOf(projectExt)
+    .map(normalizeExtraProject)
+    .filter((item): item is Project => item !== null),
+];
+
+/** ext 里写了却没匹配上简历条目的 key（多半是 PDF 里改了名称），仅在 dev 期提示 */
+const RESERVED_EXT_KEYS = new Set(['_comment', 'extra']);
+
+const warnUnmatchedExt = (bag: Record<string, unknown>, matched: string[], label: string) => {
+  if (!import.meta.env.DEV) return;
+  const known = new Set(matched);
+  for (const key of Object.keys(bag)) {
+    if (RESERVED_EXT_KEYS.has(key) || known.has(key)) continue;
+    console.warn(`[resume.ext] ${label}["${key}"] 未匹配到简历条目，该段配置已被忽略（检查名称是否改动）`);
+  }
+};
+
+warnUnmatchedExt(
+  internshipExt,
+  baseInternships.map((item) => item.name).filter((name): name is string => Boolean(name)),
+  'internships'
+);
+warnUnmatchedExt(projectExt, baseProjects.map((item) => item.name), 'projects');
 
 const awardExt = Array.isArray(ext.awards) ? ext.awards : [];
 const awardBase = Array.isArray(root.awards) ? root.awards : [];

@@ -43,12 +43,72 @@ src/components/**                ← 只做渲染，零履历文案
 
 `src/data/resume.ts` 里 ext 字段优先、缺失时回退到 base，因此只改 ext 就能调整展示口径，不必碰解析脚本。
 
-### 更新简历的两种方式
+### 加内容：先看这张表
+
+| 想加什么 | 改哪里 | 要改代码吗 |
+| --- | --- | --- |
+| 给简历里已有的项目/实习补指标、要点、架构图、链接 | `content/resume.ext.json` 里同名对象 | 不用 |
+| 简历里**没有**的新项目 / 新实习 | `content/resume.ext.json` → `projects.extra` / `internships.extra` | 不用 |
+| 新文章（个人分享） | 新建 `content/posts/my-post.md` | 不用 |
+| 新竞赛、调整技能标签 | `content/resume.ext.json` → `awards` / `skills`（整体替换） | 不用 |
+| 新增整个板块 | 见下方「加一个板块」 | 要 |
+
+**为什么新项目不写 `resume.json`**：它每次 `npm run dev` / `npm run build` 都会被解析脚本全量重写，手写内容会丢。所以新条目统一放 ext 的 `extra` 数组：
+
+```json
+"projects": {
+  "extra": [
+    {
+      "name": "新项目名",
+      "role": "独立开发",
+      "period": "2026.03–2026.06",
+      "summary": "一句话讲清做了什么、解决什么问题。",
+      "features": ["要点一", "要点二"],
+      "metrics": [{ "label": "一次通过率", "value": "74% → 91%" }],
+      "stackGroups": [{ "label": "后端", "items": ["Java", "Spring Boot"] }],
+      "architecture": { "caption": "链路说明", "mermaid": "flowchart LR\n  A[入口] --> B[处理]" },
+      "links": [{ "label": "源码", "href": "https://github.com/Xentire/xxx" }]
+    }
+  ]
+}
+```
+
+`internships.extra` 同理，`company` 必填。dev 期如果 ext 里某个 key 没匹配到简历条目（比如 PDF 里项目改名了），控制台会打印 `[resume.ext] ... 未匹配到简历条目`。
+
+### 加一篇文章
+
+新建 `content/posts/hello.md`（文件名即 slug），顶部 front-matter：
+
+```markdown
+---
+title: 标题
+date: 2026-11-15
+summary: 列表里显示的一句话摘要
+tags: [Vite, 踩坑]
+---
+
+## 正文小节
+```
+
+支持 h2–h4、列表、引用、代码块、行内代码、粗体、链接、分割线（渲染器在 `src/lib/markdown.ts`，不引第三方库）。
+
+`content/posts/_template.md` 是一份可直接复制的样例；`_` 开头的文件不会被加载，适合放模板或草稿。
+
+**没有任何文章时，「个人分享」板块和导航项会自动隐藏**，页面序号自动顺延——所以可以先放着不写。
+
+### 加一个板块
+
+1. `src/data/site.ts` 的 `sectionDefs` 里加一行：`{ key: 'notes', title: '个人分享', desc: '…', nav: '分享' }`
+   （序号 01/02/… 和导航项都由这个数组自动派生）
+2. 建 `src/components/sections/Xxx.tsx`，用 `<Section id="xxx" index={sections.xxx.index} …>` 套壳
+3. `src/App.tsx` 里挂上组件
+
+### 更新简历
 
 1. 直接替换根目录 PDF（同名或换成新的 `*.pdf`），执行 `npm run resume:sync`；
-2. 或者直接编辑 `content/resume.json`（适合只改个别措辞、补充指标）。
+2. 同步脚本还会把 PDF 复制到 `public/resume.pdf`，供页面「下载简历」按钮使用。
 
-同步脚本还会把 PDF 复制到 `public/resume.pdf`，供页面「下载简历」按钮使用。
+> PDF 重新解析后名称有变化时，ext 里按名字绑定的那段会失效（控制台有 warn），改 ext 的 key 即可。
 
 ### 调试解析
 
@@ -64,13 +124,16 @@ node scripts/sync-resume.mjs --dump   # 输出 PDF 逐行文本到 resume-lines.
 
 ```
 ├── 简历-大三2026-11-14.pdf     # 内容源
-├── content/resume.json         # 解析产物（内容层）
-├── content/resume.ext.json     # 人工扩展层（熟练度 / 架构图 / 竞赛 / 歌单）
+├── content/resume.json         # 解析产物（内容层，会被脚本重写）
+├── content/resume.ext.json     # 人工扩展层（熟练度 / 架构图 / 竞赛 / 歌单 / extra 新条目）
+├── content/posts/*.md          # 文章（文件名即 slug，_ 开头忽略）
 ├── public/resume.pdf           # 下载用的简历副本
 ├── scripts/sync-resume.mjs     # PDF → JSON 解析器
 ├── src/
 │   ├── data/resume.ts          # 类型定义 + 两层合并 + 派生字段
-│   ├── data/site.ts            # 纯 UI 文案（导航、按钮、区块副标题、图例）
+│   ├── data/site.ts            # 板块注册表 + UI 文案（序号自动生成）
+│   ├── data/posts.ts           # 构建期读入 markdown 文章
+│   ├── lib/markdown.ts         # 极简 markdown 渲染
 │   ├── hooks/                  # 滚动高亮、进入视口淡入
 │   ├── components/layout/      # Navbar / Footer / Section
 │   ├── components/sections/    # Hero / About / Skills / Experience / Awards / Projects / Interests

@@ -75,6 +75,80 @@ body {
     opacity: 1;
     transform: none;
   }
+
+  /* 文章正文（content/posts/*.md 渲染结果） */
+  .md-body {
+    @apply text-[13.5px] leading-[1.9] text-dim;
+  }
+
+  .md-body > * + * {
+    @apply mt-3.5;
+  }
+
+  .md-body h2 {
+    @apply mt-6 text-[16px] font-medium text-ink;
+  }
+
+  .md-body h3 {
+    @apply mt-5 text-[14.5px] font-medium text-ink;
+  }
+
+  .md-body h4 {
+    @apply mt-4 text-[13.5px] font-medium text-ink;
+  }
+
+  .md-body ul {
+    @apply space-y-1.5;
+  }
+
+  .md-body li {
+    @apply relative pl-4;
+  }
+
+  .md-body ul > li::before {
+    content: '';
+    @apply absolute left-0 top-[0.8em] h-[3px] w-[3px] rounded-full bg-faint;
+  }
+
+  .md-body ol {
+    @apply list-decimal space-y-1.5 pl-5 marker:text-faint;
+  }
+
+  .md-body code {
+    @apply rounded border border-line bg-elevated px-1.5 py-0.5 font-mono text-[12px] text-ink;
+  }
+
+  .md-body pre {
+    @apply relative overflow-x-auto rounded-card border border-line bg-elevated px-4 py-3.5;
+  }
+
+  .md-body pre code {
+    @apply block border-0 bg-transparent p-0 text-[12px] leading-6 text-dim;
+  }
+
+  .md-body .md-lang {
+    @apply absolute right-3 top-2 font-mono text-[11px] uppercase tracking-[0.16em] text-faint;
+  }
+
+  .md-body a {
+    @apply text-accent underline decoration-accent/40 underline-offset-2 transition-colors duration-150 hover:decoration-accent;
+  }
+
+  .md-body strong {
+    @apply font-medium text-ink;
+  }
+
+  .md-body blockquote {
+    @apply border-l-2 border-line pl-4 text-faint;
+  }
+
+  .md-body blockquote p {
+    @apply m-0;
+  }
+
+  .md-body hr {
+    @apply border-line;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

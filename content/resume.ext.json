@@ -89,6 +89,8 @@
     }
   ],
   "internships": {
+    "_comment": "以简历中的项目名为 key 覆盖字段（features / engineering / metrics）；extra 数组里可以手写简历里没有的实习条目，格式同 base 条目（company 必填）。",
+    "extra": [],
     "智能问答机器人": {
       "metrics": [
         { "label": "接入渠道", "value": "2 个" },
@@ -114,6 +116,8 @@
     }
   },
   "projects": {
+    "_comment": "以简历中的项目名为 key 覆盖字段（features / metrics / architecture / links）；extra 数组里可以手写简历里没有的新项目，字段：name(必填) / role / subtitle / period / summary / features / metrics / stackGroups / architecture / links。",
+    "extra": [],
     "DataAgent": {
       "architecture": {
         "caption": "双服务架构：Java 事实层负责权限与执行，Python 决策层负责编排与推理",

@@ -35,9 +35,22 @@ export function Projects() {
                     </p>
                   </div>
                 </div>
-                {project.period ? (
-                  <span className="shrink-0 font-mono text-[11.5px] text-faint md:pt-1">{project.period}</span>
-                ) : null}
+                <div className="flex shrink-0 flex-wrap items-center gap-x-3 gap-y-1.5 md:flex-col md:items-end md:pt-1">
+                  {project.period ? (
+                    <span className="font-mono text-[11.5px] text-faint">{project.period}</span>
+                  ) : null}
+                  {project.links.map((link) => (
+                    <a
+                      key={link.href}
+                      href={link.href}
+                      target="_blank"
+                      rel="noreferrer noopener"
+                      className="font-mono text-[11.5px] text-accent transition-colors duration-150 hover:text-ink"
+                    >
+                      {link.label}
+                    </a>
+                  ))}
+                </div>
               </div>
             </header>
 

@@ -6,6 +6,7 @@ import { Awards } from './components/sections/Awards';
 import { Experience } from './components/sections/Experience';
 import { Hero } from './components/sections/Hero';
 import { Interests } from './components/sections/Interests';
+import { Notes } from './components/sections/Notes';
 import { Projects } from './components/sections/Projects';
 import { Skills } from './components/sections/Skills';
 import { profile } from './data/resume';
@@ -31,6 +32,7 @@ export default function App() {
         <Experience />
         <Awards />
         <Projects />
+        <Notes />
         <Interests />
       </main>
       <Footer />
