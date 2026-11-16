@@ -12,7 +12,7 @@ export function Awards() {
         {awards.map((award, index) => (
           <article
             key={`${award.title}-${index}`}
-            className="card flex flex-col p-5 transition-colors duration-150 hover:border-[#2C3547]"
+            className="card flex flex-col p-5 transition-colors duration-150 hover:border-line-strong"
           >
             <div className="flex items-start justify-between gap-3">
               <span className="font-mono text-[11px] text-faint">{String(index + 1).padStart(2, '0')}</span>

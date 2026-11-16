@@ -2,6 +2,7 @@
 import { navIds, navItems, ui } from '../../data/site';
 import { profile, resumeDownloadName } from '../../data/resume';
 import { useActiveSection } from '../../hooks/useActiveSection';
+import { ThemeSwitcher } from '../ui/ThemeSwitcher';
 
 function DownloadIcon() {
   return (
@@ -81,10 +82,13 @@ export function Navbar() {
               ) : null}
             </a>
           ))}
+          <div className="ml-3">
+            <ThemeSwitcher />
+          </div>
           <a
             href={ui.resumeFile}
             download={resumeDownloadName}
-            className="ml-3 inline-flex items-center gap-1.5 rounded border border-line bg-elevated px-3 py-1.5 font-mono text-[11px] text-dim transition-colors duration-150 hover:border-accent/40 hover:text-ink"
+            className="ml-2 inline-flex items-center gap-1.5 rounded border border-line bg-elevated px-3 py-1.5 font-mono text-[11px] text-dim transition-colors duration-150 hover:border-accent/40 hover:text-ink"
           >
             <DownloadIcon />
             简历 PDF
@@ -121,6 +125,10 @@ export function Navbar() {
                 </span>
               </a>
             ))}
+            <div className="mt-4 flex items-center justify-between border-t border-line pt-4">
+              <span className="font-mono text-[11px] text-faint">{ui.themeLabel}</span>
+              <ThemeSwitcher showLabel placement="up" />
+            </div>
             <a
               href={ui.resumeFile}
               download={resumeDownloadName}

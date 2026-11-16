@@ -75,9 +75,9 @@ export function Hero() {
           <div className="lg:col-span-5">
             <div className="card overflow-hidden">
               <div className="flex items-center gap-2 border-b border-line bg-elevated px-4 py-2.5">
-                <span aria-hidden className="h-2 w-2 rounded-full bg-[#2A3242]" />
-                <span aria-hidden className="h-2 w-2 rounded-full bg-[#2A3242]" />
-                <span aria-hidden className="h-2 w-2 rounded-full bg-[#2A3242]" />
+                <span aria-hidden className="h-2 w-2 rounded-full bg-line-strong" />
+                <span aria-hidden className="h-2 w-2 rounded-full bg-line-strong" />
+                <span aria-hidden className="h-2 w-2 rounded-full bg-line-strong" />
                 <span className="ml-2 font-mono text-[11px] text-faint">~/profile — bash</span>
               </div>
 

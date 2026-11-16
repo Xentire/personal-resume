@@ -2,13 +2,75 @@
 @tailwind components;
 @tailwind utilities;
 
+/**
+ * 颜色令牌 = CSS 变量。切换主题只覆盖「背景层」五个变量（base/surface/elevated/line/line-strong），
+ * 文字与强调色保持不动，因此任何主题下对比度都不变。
+ * 想加新主题：在 index.css 加一段 [data-theme='xxx'] 覆盖，再在 src/data/theme.ts 的数组里加一项。
+ */
 :root {
   color-scheme: dark;
+
+  /* 文字与强调色：所有主题共用 */
+  --c-ink: 231 235 243;
+  --c-dim: 139 149 167;
+  --c-faint: 92 101 119;
+  --c-accent: 76 141 255;
+  --c-signal: 226 178 90;
+}
+
+:root,
+[data-theme='midnight'] {
+  --c-base: 11 14 20;
+  --c-surface: 16 20 28;
+  --c-elevated: 21 26 36;
+  --c-line: 30 37 50;
+  --c-line-strong: 44 53 71;
+}
+
+[data-theme='graphite'] {
+  --c-base: 15 16 19;
+  --c-surface: 21 23 26;
+  --c-elevated: 27 30 34;
+  --c-line: 37 40 45;
+  --c-line-strong: 53 57 64;
+}
+
+[data-theme='ocean'] {
+  --c-base: 10 20 37;
+  --c-surface: 14 27 45;
+  --c-elevated: 20 35 55;
+  --c-line: 30 47 72;
+  --c-line-strong: 44 64 96;
+}
+
+[data-theme='forest'] {
+  --c-base: 9 22 17;
+  --c-surface: 13 29 23;
+  --c-elevated: 19 37 30;
+  --c-line: 29 50 42;
+  --c-line-strong: 42 69 58;
+}
+
+[data-theme='plum'] {
+  --c-base: 21 16 32;
+  --c-surface: 26 21 38;
+  --c-elevated: 33 27 46;
+  --c-line: 46 38 62;
+  --c-line-strong: 63 53 84;
+}
+
+[data-theme='clay'] {
+  --c-base: 23 18 14;
+  --c-surface: 29 24 19;
+  --c-elevated: 36 30 24;
+  --c-line: 50 41 33;
+  --c-line-strong: 70 57 46;
 }
 
 html {
   scroll-behavior: smooth;
   -webkit-tap-highlight-color: transparent;
+  background-color: rgb(var(--c-base));
 }
 
 body {
@@ -17,7 +79,7 @@ body {
 }
 
 ::selection {
-  background-color: rgb(76 141 255 / 0.28);
+  background-color: rgb(var(--c-accent) / 0.28);
   color: #ffffff;
 }
 
@@ -27,17 +89,17 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: #0b0e14;
+  background: rgb(var(--c-base));
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #232b3a;
-  border: 3px solid #0b0e14;
+  background: rgb(var(--c-line-strong));
+  border: 3px solid rgb(var(--c-base));
   border-radius: 999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #2f3a4d;
+  background: rgb(var(--c-dim));
 }
 
 @layer components {
@@ -62,7 +124,7 @@ body {
   }
 
   .btn-ghost {
-    @apply inline-flex items-center gap-2 rounded-card border border-line bg-surface px-5 py-2.5 text-sm text-ink transition-colors duration-150 hover:border-[#2C3547] hover:bg-elevated;
+    @apply inline-flex items-center gap-2 rounded-card border border-line bg-surface px-5 py-2.5 text-sm text-ink transition-colors duration-150 hover:border-line-strong hover:bg-elevated;
   }
 
   .reveal {

@@ -30,7 +30,7 @@ export function Skills() {
           return (
             <article
               key={group.group}
-              className={`card flex flex-col p-5 transition-colors duration-150 hover:border-[#2C3547] md:p-6${
+              className={`card flex flex-col p-5 transition-colors duration-150 hover:border-line-strong md:p-6${
                 wide ? ' lg:col-span-2' : ''
               }`}
             >

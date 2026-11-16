@@ -85,6 +85,8 @@ export const ui = {
   diagramError: '架构图渲染失败，已回退为源码',
   postExpand: '展开全文',
   postCollapse: '收起',
+  themeLabel: '换配色',
+  themeHint: '仅保存在本机',
 } as const;
 
 export const labels = {

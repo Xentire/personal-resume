@@ -17,3 +17,8 @@ resume-lines.txt
 
 # 本地截图产物
 preview
+
+# headless 浏览器临时 profile
+.edge-profile
+.edge-profile-*
+vite.config.ts.timestamp-*.mjs

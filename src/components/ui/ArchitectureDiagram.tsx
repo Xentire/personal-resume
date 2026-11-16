@@ -1,11 +1,19 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import { ui } from '../../data/site';
+import { useTheme } from '../../hooks/useTheme';
 
 type Status = 'loading' | 'done' | 'error';
 
 interface Props {
   code: string;
   caption: string | null;
+}
+
+/** 把主题里 "11 14 20" 形式的 CSS 变量转成 rgb() 字符串 */
+function cssColor(name: string, fallback: string): string {
+  const raw = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  if (!raw) return fallback;
+  return `rgb(${raw.split(/\s+/).join(', ')})`;
 }
 
 /**
@@ -16,6 +24,7 @@ export function ArchitectureDiagram({ code, caption }: Props) {
   const reactId = useId();
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [status, setStatus] = useState<Status>('loading');
+  const { themeId } = useTheme();
 
   useEffect(() => {
     let cancelled = false;
@@ -31,16 +40,16 @@ export function ArchitectureDiagram({ code, caption }: Props) {
           theme: 'base',
           fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Consolas, monospace',
           themeVariables: {
-            background: '#0B0E14',
-            primaryColor: '#151A24',
-            primaryTextColor: '#E7EBF3',
-            primaryBorderColor: '#2C3547',
-            secondaryColor: '#10141C',
-            tertiaryColor: '#10141C',
-            lineColor: '#3C475C',
-            clusterBkg: '#10141C',
-            clusterBorder: '#1E2532',
-            edgeLabelBackground: '#0B0E14',
+            background: cssColor('--c-base', '#0B0E14'),
+            primaryColor: cssColor('--c-elevated', '#151A24'),
+            primaryTextColor: cssColor('--c-ink', '#E7EBF3'),
+            primaryBorderColor: cssColor('--c-line-strong', '#2C3547'),
+            secondaryColor: cssColor('--c-surface', '#10141C'),
+            tertiaryColor: cssColor('--c-surface', '#10141C'),
+            lineColor: cssColor('--c-line-strong', '#3C475C'),
+            clusterBkg: cssColor('--c-surface', '#10141C'),
+            clusterBorder: cssColor('--c-line', '#1E2532'),
+            edgeLabelBackground: cssColor('--c-base', '#0B0E14'),
             fontSize: '12px',
           },
           flowchart: { curve: 'linear', nodeSpacing: 32, rankSpacing: 40, padding: 8 },
@@ -80,7 +89,7 @@ export function ArchitectureDiagram({ code, caption }: Props) {
     return () => {
       cancelled = true;
     };
-  }, [code, reactId]);
+  }, [code, reactId, themeId]);
 
   return (
     <div className="rounded-card border border-line bg-base/50 px-4 py-4 md:px-5">

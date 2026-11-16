@@ -79,7 +79,7 @@ export function MusicPlayer({ tracks }: { tracks: Track[] }) {
               <span
                 key={barIndex}
                 style={{ height }}
-                className={['w-[3px] rounded-full', playing ? 'bg-accent' : 'bg-[#2C3547]'].join(' ')}
+                className={['w-[3px] rounded-full', playing ? 'bg-accent' : 'bg-line-strong'].join(' ')}
               />
             ))}
           </span>

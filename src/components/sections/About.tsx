@@ -62,7 +62,7 @@ export function About() {
             {aboutHighlights.map((item) => (
               <li
                 key={item.title}
-                className="card p-5 transition-colors duration-150 hover:border-[#2C3547]"
+                className="card p-5 transition-colors duration-150 hover:border-line-strong"
               >
                 <div className="flex items-center gap-2">
                   <span aria-hidden className="h-1 w-1 rounded-full bg-accent" />

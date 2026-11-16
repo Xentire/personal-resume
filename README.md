@@ -133,12 +133,13 @@ node scripts/sync-resume.mjs --dump   # 输出 PDF 逐行文本到 resume-lines.
 │   ├── data/resume.ts          # 类型定义 + 两层合并 + 派生字段
 │   ├── data/site.ts            # 板块注册表 + UI 文案（序号自动生成）
 │   ├── data/posts.ts           # 构建期读入 markdown 文章
+│   ├── data/theme.ts           # 主题注册表（配色清单 + localStorage key）
 │   ├── lib/markdown.ts         # 极简 markdown 渲染
-│   ├── hooks/                  # 滚动高亮、进入视口淡入
+│   ├── hooks/                  # 滚动高亮、进入视口淡入、主题状态
 │   ├── components/layout/      # Navbar / Footer / Section
 │   ├── components/sections/    # Hero / About / Skills / Experience / Awards / Projects / Interests
-│   └── components/ui/          # Tag / LevelBar / MetricStrip / ArchitectureDiagram / MusicPlayer
-└── tailwind.config.js          # 配色与版心令牌
+│   └── components/ui/          # Tag / LevelBar / MetricStrip / ArchitectureDiagram / MusicPlayer / ThemeSwitcher
+└── tailwind.config.js          # 配色令牌（全部指向 CSS 变量）与版心
 ```
 
 页面顺序：Hero → 关于我 → 专业技能 → 实习经历 → 竞赛荣誉 → 项目作品 → 兴趣爱好 → 页脚。
@@ -152,21 +153,68 @@ node scripts/sync-resume.mjs --dump   # 输出 PDF 逐行文本到 resume-lines.
 
 ## 设计规范
 
-| 令牌 | 值 |
+| 令牌 | 默认值（深夜黑） |
 | --- | --- |
 | 底色 / 卡片 / 内嵌 / 描边 | `#0B0E14` / `#10141C` / `#151A24` / `#1E2532` |
 | 主文字 / 次要文字 / 弱化 | `#E7EBF3` / `#8B95A7` / `#5C6577` |
 | 强调色 / 指标色 | `#4C8DFF` / `#E2B25A` |
 | 版心 / 圆角 | `1400px` / `10px` |
 
+上表的值实际定义在 `src/index.css` 的 CSS 变量里，`tailwind.config.js` 只把 `bg-base`、`text-ink`
+这类类名映射到变量，所以换主题不需要改任何组件。
+
 - 分层靠 1px 描边，不用重阴影；全站只有一个强调色。
 - 动效仅两处：hover 150ms 过渡、区块进入视口一次性淡入上浮 8px；`prefers-reduced-motion` 下全部关闭。
 - 响应式断点：`<640 / ≥640 / ≥768 / ≥1024 / ≥1280`，1400px 版心两侧自适应留白。
 
+## 换配色（主题）
+
+导航栏右侧有一个小按钮（移动端在汉堡菜单底部），点开可选 6 套深色氛围：
+
+| id | 名称 | 说明 |
+| --- | --- | --- |
+| `midnight` | 深夜黑 | 默认，品牌底色 `#0B0E14` |
+| `graphite` | 石墨灰 | 中性无彩 |
+| `ocean` | 深海蓝 | 冷调 |
+| `forest` | 墨绿 | 低饱和绿 |
+| `plum` | 暗紫 | 夜紫 |
+| `clay` | 赭石 | 暖棕 |
+
+- **只切换背景层**：`--c-base / --c-surface / --c-elevated / --c-line / --c-line-strong`，文字与强调色不动，
+  所以每套主题的对比度都一致，不会出现「某个主题字看不清」。
+- **记忆在本机**：选择写入 `localStorage['portfolio-theme']`，刷新、关浏览器都还在；
+  但它是浏览器本地的，**不同访客互不影响**（你换成墨绿，面试官打开仍是默认的深夜黑）。
+  没有后端、没有账号系统，天然隔离。
+- **首屏不闪**：`index.html` 里有一段内联脚本在 React 挂载前就按 localStorage 写好 `data-theme`。
+- **架构图跟随**：mermaid 的颜色变量从 CSS 变量读，切主题后自动重绘；`<meta name="theme-color">` 同步更新。
+- **失败兜底**：隐私模式禁用 localStorage 时，仅当次生效，不报错。
+
+加一套新主题（两处，组件不用动）：
+
+1. `src/index.css` 加一段
+
+   ```css
+   [data-theme='sand'] {
+     --c-base: 26 23 18;
+     --c-surface: 32 28 22;
+     --c-elevated: 39 34 27;
+     --c-line: 54 47 38;
+     --c-line-strong: 74 64 51;
+   }
+   ```
+
+2. `src/data/theme.ts` 的 `themes` 数组加一项：`{ id: 'sand', label: '沙', hint: '暖', base: '#1A1712', chip: '#7A6A50' }`
+   （`base` 是真底色，给地址栏用；`chip` 只是菜单里那个小圆点的中间调颜色，因为真底色太暗看不出来）
+
+> 如果想做「白天全白 / 粉色」这类**浅色**主题，只换背景层不够——文字与卡片层级也要跟着反转，
+> 属于另一档改造：在 `index.css` 里给该主题同时覆盖 `--c-ink / --c-dim / --c-faint / --c-line*` 并加
+> `color-scheme: light`，再检查一遍每处对比度。组件因为全走令牌，不需要改。
+
 ## 自定义
 
 - 导航项、按钮文案、区块副标题：`src/data/site.ts`
-- 配色、版心、字体栈：`tailwind.config.js`
+- 配色变量（主题）：`src/index.css`；主题清单：`src/data/theme.ts`
+- 版心、字体栈、令牌映射：`tailwind.config.js`
 - GitHub / 微信等联系方式：PDF 未提供，`content/resume.json` 中 `profile.contacts.github / wechat` 为
   `null` 时自动隐藏；填值后页脚自动出现对应条目（GitHub 会渲染为外链）。
 
