@@ -50,6 +50,7 @@ src/components/**                ← 只做渲染，零履历文案
 | 给简历里已有的项目/实习补指标、要点、架构图、链接 | `content/resume.ext.json` 里同名对象 | 不用 |
 | 简历里**没有**的新项目 / 新实习 | `content/resume.ext.json` → `projects.extra` / `internships.extra` | 不用 |
 | 新文章（个人分享） | 新建 `content/posts/my-post.md` | 不用 |
+| 歌单（歌手 / 曲目 / 默认曲） | `content/resume.ext.json` → `interests.artists` + `interests.defaultSong` | 不用 |
 | 新竞赛、调整技能标签 | `content/resume.ext.json` → `awards` / `skills`（整体替换） | 不用 |
 | 新增整个板块 | 见下方「加一个板块」 | 要 |
 
@@ -96,6 +97,38 @@ tags: [Vite, 踩坑]
 
 **没有任何文章时，「个人分享」板块和导航项会自动隐藏**，页面序号自动顺延——所以可以先放着不写。
 
+### 加歌 / 换歌
+
+歌手列与曲目全在 `content/resume.ext.json → interests`，改完刷新即可：
+
+```json
+"interests": {
+  "intro": "写代码时的背景音。",
+  "tags": ["粤语流行", "华语 R&B"],
+  "defaultSong": { "artist": "方大同", "title": "三人游" },
+  "artists": [
+    {
+      "name": "方大同",
+      "alias": "Khalil Fong",
+      "songs": [
+        { "title": "三人游", "album": "橙月", "year": "2008", "src": "/audio/khalil/sanrenyou.mp3" }
+      ]
+    }
+  ]
+}
+```
+
+- `artists[].name` 必填，`alias` / `songs[].album` / `year` 可省。
+- `songs[].src` 指向 `public/audio/` 下的文件（也可以写外链），留空则该曲显示「音频待接入」。
+- `defaultSong` 只决定进站时选中哪首，**不会自动播放**——浏览器本来也不允许无交互自动出声。
+- 想让「兴趣爱好」整个板块消失：`artists` 为空且 `intro` / `tags` 都为空时板块自动隐藏。
+- 超过 6 位歌手时桌面换行成第二排，不用改代码。
+- 当前仓库里的 24 首是**占位示例**，`src` 全部指向 `public/audio/_demo/tone.wav`（一段合成音）。
+  换成真实音频后，把 `public/audio/_demo/` 整个删掉即可。
+
+> 关于音频来源：曲库里的商业歌曲有版权，站内建议只放自己合法持有的音频文件，或者把 `src` 指向
+> 官方提供的外链播放地址；不要用抓取来的音频文件部署到公网。
+
 ### 加一个板块
 
 1. `src/data/site.ts` 的 `sectionDefs` 里加一行：`{ key: 'notes', title: '个人分享', desc: '…', nav: '分享' }`
@@ -128,6 +161,7 @@ node scripts/sync-resume.mjs --dump   # 输出 PDF 逐行文本到 resume-lines.
 ├── content/resume.ext.json     # 人工扩展层（熟练度 / 架构图 / 竞赛 / 歌单 / extra 新条目）
 ├── content/posts/*.md          # 文章（文件名即 slug，_ 开头忽略）
 ├── public/resume.pdf           # 下载用的简历副本
+├── public/audio/               # 音频（_demo/ 是占位音，接真实曲目后可删）
 ├── scripts/sync-resume.mjs     # PDF → JSON 解析器
 ├── src/
 │   ├── data/resume.ts          # 类型定义 + 两层合并 + 派生字段
@@ -138,7 +172,7 @@ node scripts/sync-resume.mjs --dump   # 输出 PDF 逐行文本到 resume-lines.
 │   ├── hooks/                  # 滚动高亮、进入视口淡入、主题状态
 │   ├── components/layout/      # Navbar / Footer / Section
 │   ├── components/sections/    # Hero / About / Skills / Experience / Awards / Projects / Interests
-│   └── components/ui/          # Tag / LevelBar / MetricStrip / ArchitectureDiagram / MusicPlayer / ThemeSwitcher
+│   └── components/ui/          # Tag / LevelBar / MetricStrip / ArchitectureDiagram / MusicShelf / ThemeSwitcher
 └── tailwind.config.js          # 配色令牌（全部指向 CSS 变量）与版心
 ```
 
@@ -148,8 +182,11 @@ node scripts/sync-resume.mjs --dump   # 输出 PDF 逐行文本到 resume-lines.
 - 项目卡顺序为 关键指标条 → mermaid 架构图 → 8:4 双栏（描述 / 技术栈）。
 - 架构图用 mermaid 11（`securityLevel: 'strict'`）按需 `import()`，没有架构图的项目不会加载 mermaid；
   窄屏下保持自然像素宽并在卡片内横向滚动，不压缩成不可读的小图。
-- 兴趣区播放器为占位组件：在 `resume.ext.json → interests.playlist` 里填 `{ title, artist, src }`
-  （音频文件放 `public/audio/`）即自动启用，空数组时显示禁用态。
+- 兴趣区是「歌手列 + 播放条」：桌面 6 列并排（`lg:grid-cols-6`），窄屏 2 列；点歌手列头展开该列曲目，
+  同时只开一列（手风琴）；点曲目直接播放，`defaultSong` 决定进站时默认选中的那首——**只选中，不自动播放**。
+  展开动画用 `grid-template-rows: 0fr → 1fr`，不测高度所以不抖；曲目逐条 30ms 延迟淡入。
+- 音频放在 `public/audio/` 下，`songs[].src` 写 `/audio/xxx.mp3` 这样的站内路径（也支持外链）。
+  `src` 留空的曲目会显示为「音频待接入」，仍可选中但播放键置灰。
 
 ## 设计规范
 

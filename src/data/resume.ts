@@ -114,17 +114,29 @@ export interface Highlight {
   desc: string;
 }
 
-export interface Track {
+export interface Song {
   title: string;
-  artist: string;
-  src: string;
-  cover?: string | null;
+  album: string | null;
+  year: string | null;
+  /** 音频地址（public/audio 下的相对路径或外链）；为空表示还没接入文件 */
+  src: string | null;
+}
+
+export interface Artist {
+  name: string;
+  /** 英文名 / 别名，显示在歌手名下方 */
+  alias: string | null;
+  note: string | null;
+  songs: Song[];
 }
 
 export interface Interests {
   intro: string | null;
   tags: string[];
-  playlist: Track[];
+  artists: Artist[];
+  /** 进站时默认选中（不自动播放）的那首 */
+  defaultSong: { artist: string; title: string } | null;
+  songCount: number;
 }
 
 /* ------------------------------------------------------------------ */
@@ -452,24 +464,54 @@ export const aboutHighlights: Highlight[] = Array.isArray(aboutRaw.highlights)
 
 const interestsRaw = record(ext.interests);
 
+const songOf = (value: unknown): Song | null => {
+  const row = record(value);
+  const title = text(row.title);
+  if (!title) return null;
+  return { title, album: text(row.album), year: text(row.year), src: text(row.src) };
+};
+
+const artistOf = (value: unknown): Artist | null => {
+  const row = record(value);
+  const name = text(row.name);
+  if (!name) return null;
+  const songs = Array.isArray(row.songs)
+    ? row.songs.map(songOf).filter((song): song is Song => song !== null)
+    : [];
+  return { name, alias: text(row.alias), note: text(row.note), songs };
+};
+
+/** 兼容旧格式：interests.playlist 里的扁平曲目按 artist 聚合成列 */
+const legacyArtists = (): Artist[] => {
+  const rows = Array.isArray(interestsRaw.playlist) ? interestsRaw.playlist : [];
+  const grouped = new Map<string, Song[]>();
+  for (const item of rows) {
+    const row = record(item);
+    const src = text(row.src);
+    if (!src) continue;
+    const artistName = text(row.artist) ?? '未分组';
+    const song: Song = { title: text(row.title) ?? '未命名曲目', album: null, year: null, src };
+    grouped.set(artistName, [...(grouped.get(artistName) ?? []), song]);
+  }
+  return [...grouped.entries()].map(([name, songs]) => ({ name, alias: null, note: null, songs }));
+};
+
+const artistList = Array.isArray(interestsRaw.artists)
+  ? interestsRaw.artists.map(artistOf).filter((artist): artist is Artist => artist !== null)
+  : [];
+
+const defaultSongRaw = record(interestsRaw.defaultSong);
+const defaultSongTitle = text(defaultSongRaw.title);
+const resolvedArtists = artistList.length ? artistList : legacyArtists();
+
 export const interests: Interests = {
   intro: text(interestsRaw.intro),
   tags: list(interestsRaw.tags),
-  playlist: Array.isArray(interestsRaw.playlist)
-    ? interestsRaw.playlist
-        .map((item): Track | null => {
-          const row = record(item);
-          const src = text(row.src);
-          if (!src) return null;
-          return {
-            title: text(row.title) ?? '未命名曲目',
-            artist: text(row.artist) ?? '',
-            src,
-            cover: text(row.cover),
-          };
-        })
-        .filter((track): track is Track => track !== null)
-    : [],
+  artists: resolvedArtists,
+  defaultSong: defaultSongTitle
+    ? { artist: text(defaultSongRaw.artist) ?? '', title: defaultSongTitle }
+    : null,
+  songCount: resolvedArtists.reduce((sum, artist) => sum + artist.songs.length, 0),
 };
 
 /* ------------------------------------------------------------------ */
