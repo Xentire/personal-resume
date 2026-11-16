@@ -1,5 +1,6 @@
 ﻿import { profile, resumeDownloadName } from '../../data/resume';
 import { labels, navItems, sections, ui } from '../../data/site';
+import { SectionLink } from '../ui/SectionLink';
 
 function toUrl(value: string) {
   return /^https?:\/\//i.test(value) ? value : `https://${value}`;
@@ -57,12 +58,12 @@ export function Footer() {
             <ul className="mt-4 grid grid-cols-2 gap-y-2.5">
               {navItems.map((item) => (
                 <li key={item.id}>
-                  <a
-                    href={`#${item.id}`}
+                  <SectionLink
+                    id={item.id}
                     className="text-[13px] text-dim transition-colors duration-150 hover:text-ink"
                   >
                     {item.label}
-                  </a>
+                  </SectionLink>
                 </li>
               ))}
             </ul>
@@ -86,13 +87,13 @@ export function Footer() {
           <p className="font-mono text-[11px] text-faint">
             © {year} {profile.name}
           </p>
-          <a
-            href="#top"
+          <SectionLink
+            id="top"
             className="inline-flex items-center gap-1.5 font-mono text-[11px] text-dim transition-colors duration-150 hover:text-ink"
           >
             <span aria-hidden>↑</span>
             {ui.backToTop}
-          </a>
+          </SectionLink>
         </div>
       </div>
     </footer>

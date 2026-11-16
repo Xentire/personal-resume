@@ -1,5 +1,6 @@
+import { Link } from 'react-router-dom';
 import { projects } from '../../data/resume';
-import { labels, sections } from '../../data/site';
+import { labels, sections, ui } from '../../data/site';
 import { Section } from '../layout/Section';
 import { ArchitectureDiagram } from '../ui/ArchitectureDiagram';
 import { BulletList, MetricStrip, StackList, SubHeading } from '../ui/Primitives';
@@ -86,6 +87,19 @@ export function Projects() {
                 ) : null}
               </div>
             </div>
+
+            <footer className="flex items-center justify-between gap-3 border-t border-line px-5 py-3 md:px-7">
+              <span className="font-mono text-[10.5px] uppercase tracking-[0.12em] text-faint">
+                {String(index + 1).padStart(2, '0')} / {String(projects.length).padStart(2, '0')}
+              </span>
+              <Link
+                to={`/projects/${encodeURIComponent(project.name)}`}
+                className="inline-flex items-center gap-1.5 font-mono text-[11.5px] text-accent transition-colors duration-150 hover:text-ink"
+              >
+                {ui.projectDetail}
+                <span aria-hidden>→</span>
+              </Link>
+            </footer>
           </article>
         ))}
       </div>

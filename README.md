@@ -51,6 +51,8 @@ src/components/**                ← 只做渲染，零履历文案
 | 简历里**没有**的新项目 / 新实习 | `content/resume.ext.json` → `projects.extra` / `internships.extra` | 不用 |
 | 新文章（个人分享） | 新建 `content/posts/my-post.md` | 不用 |
 | 歌单（歌手 / 曲目 / 默认曲） | `content/resume.ext.json` → `interests.artists` + `interests.defaultSong` | 不用 |
+| 项目详情页的长文 | 新建 `content/projects/<项目名>.md` | 不用 |
+| 一整类新页面（如博客列表、单独的经历页） | `src/App.tsx` 加一条 `<Route>` + 在 `src/pages/` 建组件 | 要 |
 | 新竞赛、调整技能标签 | `content/resume.ext.json` → `awards` / `skills`（整体替换） | 不用 |
 | 新增整个板块 | 见下方「加一个板块」 | 要 |
 
@@ -129,6 +131,47 @@ tags: [Vite, 踩坑]
 > 关于音频来源：曲库里的商业歌曲有版权，站内建议只放自己合法持有的音频文件，或者把 `src` 指向
 > 官方提供的外链播放地址；不要用抓取来的音频文件部署到公网。
 
+### 项目详情页（多页面）
+
+站点已经不是「只有一个页面」了。当前路由表在 `src/App.tsx`：
+
+| 路径 | 内容 | 数据来源 |
+| --- | --- | --- |
+| `/` | 首页，一屏到底的所有区块 | `resume.json` + `resume.ext.json` |
+| `/projects/:slug` | 单个项目详情页 | 同上，`slug` 就是项目名（会自动 URL 编码） |
+| `*` | 404 | — |
+
+首页每张项目卡底部有「查看详情 →」，跳转 `/projects/DataAgent` 这种地址。详情页会渲染
+指标、架构图、项目描述、核心工作、技术栈，以及**可选的**长文。
+
+**给某个项目加一篇长文**（不用改代码）：
+
+1. 新建 `content/projects/DataAgent.md`（文件名必须和项目名完全一致）；
+2. 直接写 markdown 正文，支持 h2–h4、列表、引用、代码块、粗体、链接、分割线；
+3. 详情页会在「项目详述」下渲染它。
+
+`content/projects/_template.md` 是可复制的模板，`_` 开头的文件不会被加载。
+没有 md 文件时详情页只渲染结构化字段，不会报错也没有空状态提示。
+
+**加一个全新的页面类型**（比如博客列表 `/posts`）：
+
+1. `src/pages/Posts.tsx` 建组件；
+2. `src/App.tsx` 的 `<Routes>` 里加 `<Route path="/posts" element={<Posts />} />`；
+3. 页面里记得 `document.title = ...`（参考 `pages/Home.tsx`、`pages/ProjectDetail.tsx`）。
+
+**部署注意**：用的是 `BrowserRouter` + History API，所以 Vercel 上必须有 SPA 回退，
+否则直接访问 `/projects/DataAgent` 会 404。仓库根目录的 `vercel.json` 已经配好：
+
+```json
+{ "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }] }
+```
+
+Vercel 的 `rewrites` 会先匹配真实文件，所以 `/resume.pdf`、`/assets/*` 不会被带走。
+换成 Netlify（`_redirects`）或 GitHub Pages（需要 404.html hack）时别忘了对应配置。
+
+**站内链接不要写裸 `<a href="/#projects">`**：跨页面跳到首页区块时用 `components/ui/SectionLink.tsx`，
+它走路由并交给 `ScrollManager` 滚动，否则整页会刷新一次。
+
 ### 加一个板块
 
 1. `src/data/site.ts` 的 `sectionDefs` 里加一行：`{ key: 'notes', title: '个人分享', desc: '…', nav: '分享' }`
@@ -160,19 +203,24 @@ node scripts/sync-resume.mjs --dump   # 输出 PDF 逐行文本到 resume-lines.
 ├── content/resume.json         # 解析产物（内容层，会被脚本重写）
 ├── content/resume.ext.json     # 人工扩展层（熟练度 / 架构图 / 竞赛 / 歌单 / extra 新条目）
 ├── content/posts/*.md          # 文章（文件名即 slug，_ 开头忽略）
+├── content/projects/*.md       # 项目详情页长文（文件名 = 项目名，_ 开头忽略）
 ├── public/resume.pdf           # 下载用的简历副本
 ├── public/audio/               # 音频（_demo/ 是占位音，接真实曲目后可删）
 ├── scripts/sync-resume.mjs     # PDF → JSON 解析器
+├── vercel.json                 # SPA 回退（/projects/xxx 直接访问不 404）
 ├── src/
+│   ├── App.tsx                 # 路由表：/ 首页、/projects/:slug 详情、* 404
+│   ├── pages/                  # Home（首页区块拼装）/ ProjectDetail
 │   ├── data/resume.ts          # 类型定义 + 两层合并 + 派生字段
 │   ├── data/site.ts            # 板块注册表 + UI 文案（序号自动生成）
 │   ├── data/posts.ts           # 构建期读入 markdown 文章
+│   ├── data/projectDocs.ts     # 构建期读入项目详情长文
 │   ├── data/theme.ts           # 主题注册表（配色清单 + localStorage key）
 │   ├── lib/markdown.ts         # 极简 markdown 渲染
 │   ├── hooks/                  # 滚动高亮、进入视口淡入、主题状态
-│   ├── components/layout/      # Navbar / Footer / Section
+│   ├── components/layout/      # Navbar / Footer / Section / ScrollManager
 │   ├── components/sections/    # Hero / About / Skills / Experience / Awards / Projects / Interests
-│   └── components/ui/          # Tag / LevelBar / MetricStrip / ArchitectureDiagram / MusicShelf / ThemeSwitcher
+│   └── components/ui/          # Tag / MetricStrip / ArchitectureDiagram / MusicShelf / ThemeSwitcher / SectionLink
 └── tailwind.config.js          # 配色令牌（全部指向 CSS 变量）与版心
 ```
 
@@ -257,4 +305,4 @@ node scripts/sync-resume.mjs --dump   # 输出 PDF 逐行文本到 resume-lines.
 
 ## 技术栈
 
-React 18 · Vite 5 · TypeScript · TailwindCSS 3 · mermaid 11（架构图，按需加载） · pdfjs-dist（仅构建期解析 PDF，不进运行时包）
+React 18 · Vite 5 · TypeScript · TailwindCSS 3 · React Router 6（多页面） · mermaid 11（架构图，按需加载） · pdfjs-dist（仅构建期解析 PDF，不进运行时包）

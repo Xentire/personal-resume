@@ -1,5 +1,6 @@
 ﻿import { heroKeywords, heroStats, meta, profile, projects, resumeDownloadName, skillGroups } from '../../data/resume';
 import { ui } from '../../data/site';
+import { SectionLink } from '../ui/SectionLink';
 
 function ArrowIcon() {
   return (
@@ -61,10 +62,10 @@ export function Hero() {
             </div>
 
             <div className="mt-8 flex flex-wrap items-center gap-3">
-              <a href="#projects" className="btn-primary">
+              <SectionLink id="projects" className="btn-primary">
                 {ui.heroPrimary}
                 <ArrowIcon />
-              </a>
+              </SectionLink>
               <a href={ui.resumeFile} download={resumeDownloadName} className="btn-ghost">
                 <DownloadIcon />
                 {ui.heroSecondary}

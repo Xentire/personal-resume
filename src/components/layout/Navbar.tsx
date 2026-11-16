@@ -1,7 +1,9 @@
 ﻿import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { navIds, navItems, ui } from '../../data/site';
 import { profile, resumeDownloadName } from '../../data/resume';
 import { useActiveSection } from '../../hooks/useActiveSection';
+import { SectionLink } from '../ui/SectionLink';
 import { ThemeSwitcher } from '../ui/ThemeSwitcher';
 
 function DownloadIcon() {
@@ -56,7 +58,7 @@ export function Navbar() {
       ].join(' ')}
     >
       <div className="container-page flex h-16 items-center justify-between gap-4">
-        <a href="#top" className="flex items-center gap-3" onClick={() => setOpen(false)}>
+        <Link to="/" className="flex items-center gap-3" onClick={() => setOpen(false)}>
           <span className="grid h-8 w-8 place-items-center rounded border border-line bg-elevated font-mono text-[13px] text-accent">
             {profile.name.slice(0, 1)}
           </span>
@@ -64,13 +66,13 @@ export function Navbar() {
             <span className="text-[13.5px] text-ink">{profile.name}</span>
             <span className="font-mono text-[11px] text-faint">{profile.roleShort}</span>
           </span>
-        </a>
+        </Link>
 
         <nav aria-label="页面导航" className="hidden items-center gap-0.5 lg:flex">
           {navItems.map((item) => (
-            <a
+            <SectionLink
               key={item.id}
-              href={`#${item.id}`}
+              id={item.id}
               className={[
                 'relative rounded px-2.5 py-2 text-[12.5px] transition-colors duration-150',
                 active === item.id ? 'text-ink' : 'text-dim hover:text-ink',
@@ -80,7 +82,7 @@ export function Navbar() {
               {active === item.id ? (
                 <span aria-hidden className="absolute inset-x-2.5 -bottom-px h-px bg-accent" />
               ) : null}
-            </a>
+            </SectionLink>
           ))}
           <div className="ml-3">
             <ThemeSwitcher />
@@ -110,9 +112,9 @@ export function Navbar() {
         <div className="max-h-[calc(100vh-4rem)] overflow-y-auto border-t border-line bg-base lg:hidden">
           <nav aria-label="移动端导航" className="container-page flex flex-col py-2">
             {navItems.map((item) => (
-              <a
+              <SectionLink
                 key={item.id}
-                href={`#${item.id}`}
+                id={item.id}
                 onClick={() => setOpen(false)}
                 className={[
                   'flex items-center justify-between border-b border-line/60 py-3.5 text-[14px] transition-colors duration-150',
@@ -123,7 +125,7 @@ export function Navbar() {
                 <span aria-hidden className="font-mono text-[11px] text-faint">
                   {active === item.id ? '●' : '›'}
                 </span>
-              </a>
+              </SectionLink>
             ))}
             <div className="mt-4 flex items-center justify-between border-t border-line pt-4">
               <span className="font-mono text-[11px] text-faint">{ui.themeLabel}</span>
