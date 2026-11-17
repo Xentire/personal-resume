@@ -6,6 +6,7 @@ dist-ssr
 resume-lines.txt
 .dev.log
 *.log
+.git-msg.txt
 
 # 依赖重装时的临时备份目录
 .nm_bak
