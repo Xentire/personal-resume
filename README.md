@@ -39,7 +39,7 @@ src/components/**                ← 只做渲染，零履历文案
 | 文件 | 谁来写 | 放什么 |
 | --- | --- | --- |
 | `content/resume.json` | `scripts/sync-resume.mjs` 自动生成 | 姓名、教育、实习、项目、荣誉等原始事实 |
-| `content/resume.ext.json` | 手写，重新 sync 也不会被覆盖 | 技能熟练度与落地场景、实习量化指标/要点、项目架构图（mermaid）、竞赛细节、兴趣歌单 |
+| `content/resume.ext.json` | 手写，重新 sync 也不会被覆盖 | 技能熟练度与落地场景、实习量化指标/要点、项目架构图（mermaid）、竞赛细节 |
 
 `src/data/resume.ts` 里 ext 字段优先、缺失时回退到 base，因此只改 ext 就能调整展示口径，不必碰解析脚本。
 
@@ -50,7 +50,6 @@ src/components/**                ← 只做渲染，零履历文案
 | 给简历里已有的项目/实习补指标、要点、架构图、链接 | `content/resume.ext.json` 里同名对象 | 不用 |
 | 简历里**没有**的新项目 / 新实习 | `content/resume.ext.json` → `projects.extra` / `internships.extra` | 不用 |
 | 新文章（个人分享） | 新建 `content/posts/my-post.md` | 不用 |
-| 歌单（歌手 / 曲目 / 默认曲） | `content/resume.ext.json` → `interests.artists` + `interests.defaultSong` | 不用 |
 | 项目详情页的长文 | 新建 `content/projects/<项目名>.md` | 不用 |
 | 一整类新页面（如博客列表、单独的经历页） | `src/App.tsx` 加一条 `<Route>` + 在 `src/pages/` 建组件 | 要 |
 | 新竞赛、调整技能标签 | `content/resume.ext.json` → `awards` / `skills`（整体替换） | 不用 |
@@ -99,90 +98,20 @@ tags: [Vite, 踩坑]
 
 **没有任何文章时，「个人分享」板块和导航项会自动隐藏**，页面序号自动顺延——所以可以先放着不写。
 
-### 加歌 / 换歌
+### 为什么没有「兴趣爱好 / 歌单」板块
 
-歌手列与曲目全在 `content/resume.ext.json → interests`，改完刷新即可：
+2026-11-17 移除的，原因写在下面，别再往回加：
 
-```json
-"interests": {
-  "intro": "写代码时的背景音。",
-  "tags": ["粤语流行", "华语 R&B"],
-  "listenProvider": "netease",
-  "defaultSong": { "artist": "方大同", "title": "三人游" },
-  "artists": [
-    {
-      "name": "方大同",
-      "alias": "Khalil Fong",
-      "songs": [
-        { "title": "三人游", "album": "橙月", "year": "2008" }
-      ]
-    }
-  ]
-}
-```
+- 想在站内听到某首歌 → 必须在自己的域名下托管音频文件，那是**复制发行**，跟盈不盈利无关。
+  平台会员/单曲购买只授权你在它自己的 App 里听，不包含再分发；要合法得找唱片公司谈授权。
+- 用平台官方外链播放器（`outchain/player`）→ 实测 VIP 曲目在匿名上下文里连 30 秒试听都不给
+  （任我行 / 落花流水 / 沙龙 / Shall We Talk / 葡萄成熟时 全部 `00:00` 无声），
+  只有免费曲目能放。所谓"给片段"这条路在技术上就不存在。
+- 纯跳转平台 → 能做，但一个只有链接的"兴趣区"对求职没有任何加分，不如把版面留给项目。
 
-- `artists[].name` 必填，`alias` / `songs[].album` / `year` 可省。
-- `defaultSong` 只决定进站时选中哪首，**不会自动播放**——浏览器本来也不允许无交互自动出声。
-- 想让「兴趣爱好」整个板块消失：`artists` 为空且 `intro` / `tags` 都为空时板块自动隐藏。
-- 超过 6 位歌手时桌面换行成第二排，不用改代码。
-
-### 曲目怎么"响"：三种模式
-
-一首歌走哪条路，由字段组合自动判定（`MusicShelf.tsx` 里的 `modeOf`）：
-
-| 优先级 | 条件 | 点击曲目发生什么 | 底部播放条 |
-| --- | --- | --- | --- |
-| 1 | `src` 有值 | 站内播放，出现进度条、上一首/下一首 | 进度条 |
-| 2 | `inline: true` + `neteaseId` | 站内加载网易云**官方外链播放器** | 官方 66px iframe |
-| 3 | 其余（**默认**） | 新标签页打开平台**单曲页**（有 `neteaseId`）或搜索页 | 外链按钮 |
-
-```json
-{ "title": "阿猫阿狗", "album": "The Key", "year": "2013", "neteaseId": 27483200, "inline": true }
-{ "title": "任我行", "album": "The Key", "year": "2013", "neteaseId": 27483202 }
-```
-
-- `neteaseId`：填了就让跳转直接落到单曲页，而不是搜索结果页，体验好很多；
-- `inline: true`：只有**实测确认能在匿名 iframe 里出声**的曲目才开，其余一律留空走跳转；
-- `defaultSong` 只决定进站选中哪首，**不会自动播放**——浏览器也不允许无交互自动出声；
-- 想让「兴趣爱好」整个板块消失：`artists` 为空且 `intro` / `tags` 都为空时板块自动隐藏；
-- 超过 6 位歌手时桌面换行成第二排，不用改代码。
-
-`listenProvider` 可选 `netease`（网易云，默认）/ `qq`（QQ 音乐）/ `spotify`，链接模板在
-`src/lib/music.ts`，加平台只改一个对象。
-
-### 关于 `inline`：VIP 曲目在匿名 iframe 里不出声
-
-2026-11 实测（`music.163.com/outchain/player?type=2&id=...`，无登录态）：
-
-| 曲目 | id | 在外链播放器里 |
-| --- | --- | --- |
-| 任我行 | 27483202 | 显示 00:00，点击无声 |
-| 落花流水 | 64922 | 显示 00:00，点击无声 |
-| 沙龙 | 64833 | 显示 00:00，点击无声 |
-| Shall We Talk | 67411 | 显示 00:00，点击无声 |
-| 葡萄成熟时 | 66285 | 显示 00:00，点击无声 |
-| 阿猫阿狗 | 27483200 | 03:43，可播放 |
-
-结论：**VIP / 付费曲目连 30 秒试听都不给**，外链播放器不是绕过授权的手段。所以陈奕迅那 6 首里
-只有《阿猫阿狗》开了 `inline`，其余 5 首保留 `neteaseId` 直接跳单曲页——点开就是平台自己的
-正版播放页，登录后 VIP 身份照常生效。
-
-站内不托管音源的理由没变：在自己域名下复制发行他人录音，不盈利也照样有风险。
-`songs[].src` 只在你**确实拥有使用权**时填（自己录的、明确授权的、CC 协议素材），文件放
-`public/audio/` 下写 `/audio/xxx.mp3`。不要把自己从流媒体抓下来的文件放进仓库再部署到公网。
-
-### 整张歌单级的外链播放器
-
-还可以在 `interests` 里再挂一个整张歌单的官方播放器（会显示在内容卡下方）：
-
-```json
-"embedSrc": "https://music.163.com/outchain/player?type=0&id=歌单ID&auto=0&height=430",
-"embedHeight": 430
-```
-
-- 从网易云网页版「生成外链播放器」拿（QQ 音乐同理），是平台**主动提供**的嵌入方式；
-- `auto=0` 保证进站不自动响；不填就整块不渲染；
-- 单曲级的 `inline` 与外链播放器是两套独立开关，互不影响。
+结论：这栏整体删掉。`content/resume.ext.json` 里的 `interests` 数据、`ui/MusicShelf.tsx`、
+`lib/music.ts`、`ui.player*` 文案、`.eq-bar` 样式全部一并清除。若哪天只想放文字版兴趣（读书/跑步这类），
+按「加一个板块」重新加即可，不需要恢复播放器。
 
 ### 项目详情页（多页面）
 
@@ -227,10 +156,10 @@ Vercel 的 `rewrites` 会先匹配真实文件，所以 `/resume.pdf`、`/assets
 
 ### 加一个板块
 
-1. `src/data/site.ts` 的 `sectionDefs` 里加一行：`{ key: 'notes', title: '个人分享', desc: '…', nav: '分享' }`
+1. `src/data/site.ts` 的 `sectionDefs` 里加一行：`{ key: 'xxx', title: '标题', desc: '…', nav: '导航名' }`
    （序号 01/02/… 和导航项都由这个数组自动派生）
 2. 建 `src/components/sections/Xxx.tsx`，用 `<Section id="xxx" index={sections.xxx.index} …>` 套壳
-3. `src/App.tsx` 里挂上组件
+3. `src/pages/Home.tsx` 里挂上组件（区块都拼在首页；`App.tsx` 只放路由表）
 
 ### 更新简历
 
@@ -254,11 +183,10 @@ node scripts/sync-resume.mjs --dump   # 输出 PDF 逐行文本到 resume-lines.
 ```
 ├── 简历-大三2026-11-14.pdf     # 内容源
 ├── content/resume.json         # 解析产物（内容层，会被脚本重写）
-├── content/resume.ext.json     # 人工扩展层（熟练度 / 架构图 / 竞赛 / 歌单 / extra 新条目）
+├── content/resume.ext.json     # 人工扩展层（熟练度 / 架构图 / 竞赛 / extra 新条目）
 ├── content/posts/*.md          # 文章（文件名即 slug，_ 开头忽略）
 ├── content/projects/*.md       # 项目详情页长文（文件名 = 项目名，_ 开头忽略）
 ├── public/resume.pdf           # 下载用的简历副本
-├── public/audio/               # 仅放你确实有使用权的音频（默认不用，曲目走官方平台跳转）
 ├── scripts/sync-resume.mjs     # PDF → JSON 解析器
 ├── vercel.json                 # SPA 回退（/projects/xxx 直接访问不 404）
 ├── src/
@@ -272,22 +200,18 @@ node scripts/sync-resume.mjs --dump   # 输出 PDF 逐行文本到 resume-lines.
 │   ├── lib/markdown.ts         # 极简 markdown 渲染
 │   ├── hooks/                  # 滚动高亮、进入视口淡入、主题状态
 │   ├── components/layout/      # Navbar / Footer / Section / ScrollManager
-│   ├── components/sections/    # Hero / About / Skills / Experience / Awards / Projects / Interests
-│   └── components/ui/          # Tag / MetricStrip / ArchitectureDiagram / MusicShelf / ThemeSwitcher / SectionLink
+│   ├── components/sections/    # Hero / About / Skills / Experience / Awards / Projects / Notes
+│   └── components/ui/          # Tag / MetricStrip / ArchitectureDiagram / ThemeSwitcher / SectionLink
 └── tailwind.config.js          # 配色令牌（全部指向 CSS 变量）与版心
 ```
 
-页面顺序：Hero → 关于我 → 专业技能 → 实习经历 → 竞赛荣誉 → 项目作品 → 兴趣爱好 → 页脚。
+页面顺序：Hero → 关于我 → 专业技能 → 实习经历 → 竞赛荣誉 → 项目作品 → 个人分享 → 页脚。
+（「个人分享」在 `content/posts/` 没有文章时自动隐藏。兴趣/歌单板块已于 2026-11-17 移除，原因见上文。）
 
 - 技能区每个标签带 4 段熟练度条（熟练 / 掌握 / 熟悉 / 了解）与一条「落地场景」说明。
 - 项目卡顺序为 关键指标条 → mermaid 架构图 → 8:4 双栏（描述 / 技术栈）。
 - 架构图用 mermaid 11（`securityLevel: 'strict'`）按需 `import()`，没有架构图的项目不会加载 mermaid；
   窄屏下保持自然像素宽并在卡片内横向滚动，不压缩成不可读的小图。
-- 兴趣区是「歌手列 + 收听条」：桌面 6 列并排（`lg:grid-cols-6`），窄屏 2 列；点歌手列头展开该列曲目，
-  同时只开一列（手风琴）；`defaultSong` 决定进站时默认选中的那首——**只选中，不自动播放**。
-  展开动画用 `grid-template-rows: 0fr → 1fr`，不测高度所以不抖；曲目逐条 30ms 延迟淡入。
-- 曲目默认跳转到官方平台收听（站内不托管音源）；`songs[].src` 有值时才切成站内播放，
-  文件放 `public/audio/`，写 `/audio/xxx.mp3` 这样的路径。
 
 ## 设计规范
 

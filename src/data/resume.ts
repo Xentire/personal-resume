@@ -3,14 +3,12 @@
  *
  * 两层内容：
  *   1. content/resume.json      —— 由 scripts/sync-resume.mjs 从 PDF 解析生成，会被重新覆盖；
- *   2. content/resume.ext.json  —— 人工维护的扩展层（技能熟练度、落地场景、架构图、竞赛细节、兴趣），
+ *   2. content/resume.ext.json  —— 人工维护的扩展层（技能熟练度、落地场景、架构图、竞赛细节），
  *                                  同步脚本不碰这个文件，因此可以放心手写。
  * 组件只消费本文件导出的数据，不书写任何履历文案。
  */
 import raw from '../../content/resume.json';
 import extRaw from '../../content/resume.ext.json';
-import type { ListenProvider } from '../lib/music';
-import { providerOf } from '../lib/music';
 
 /* ------------------------------------------------------------------ */
 /* 类型                                                               */
@@ -114,40 +112,6 @@ export interface AwardItem {
 export interface Highlight {
   title: string;
   desc: string;
-}
-
-export interface Song {
-  title: string;
-  album: string | null;
-  year: string | null;
-  /** 音频地址（public/audio 下的相对路径或外链）；为空表示没有站内音频 */
-  src: string | null;
-  /** 网易云单曲 id：跳转可以直接落到单曲页，而不是搜索结果 */
-  neteaseId: number | null;
-  /** 该曲能否用网易云官方外链播放器站内播放（实测只有免费曲目可以，VIP 匿名一律不出声） */
-  inline: boolean;
-}
-
-export interface Artist {
-  name: string;
-  /** 英文名 / 别名，显示在歌手名下方 */
-  alias: string | null;
-  note: string | null;
-  songs: Song[];
-}
-
-export interface Interests {
-  intro: string | null;
-  tags: string[];
-  artists: Artist[];
-  /** 进站时默认选中（不自动播放）的那首 */
-  defaultSong: { artist: string; title: string } | null;
-  /** 没有内置音频时，点曲目跳到哪个平台去听 */
-  listenProvider: ListenProvider;
-  /** 官方外链播放器 iframe 地址（可选），填了就渲染一块官方播放器 */
-  embedSrc: string | null;
-  embedHeight: number;
-  songCount: number;
 }
 
 /* ------------------------------------------------------------------ */
@@ -472,76 +436,6 @@ export const aboutHighlights: Highlight[] = Array.isArray(aboutRaw.highlights)
       })
       .filter((item): item is Highlight => item !== null)
   : [];
-
-const interestsRaw = record(ext.interests);
-
-const songOf = (value: unknown): Song | null => {
-  const row = record(value);
-  const title = text(row.title);
-  if (!title) return null;
-  const neteaseId = Number(row.neteaseId);
-  return {
-    title,
-    album: text(row.album),
-    year: text(row.year),
-    src: text(row.src),
-    neteaseId: Number.isFinite(neteaseId) && neteaseId > 0 ? neteaseId : null,
-    inline: row.inline === true,
-  };
-};
-
-const artistOf = (value: unknown): Artist | null => {
-  const row = record(value);
-  const name = text(row.name);
-  if (!name) return null;
-  const songs = Array.isArray(row.songs)
-    ? row.songs.map(songOf).filter((song): song is Song => song !== null)
-    : [];
-  return { name, alias: text(row.alias), note: text(row.note), songs };
-};
-
-/** 兼容旧格式：interests.playlist 里的扁平曲目按 artist 聚合成列 */
-const legacyArtists = (): Artist[] => {
-  const rows = Array.isArray(interestsRaw.playlist) ? interestsRaw.playlist : [];
-  const grouped = new Map<string, Song[]>();
-  for (const item of rows) {
-    const row = record(item);
-    const src = text(row.src);
-    if (!src) continue;
-    const artistName = text(row.artist) ?? '未分组';
-    const song: Song = {
-      title: text(row.title) ?? '未命名曲目',
-      album: null,
-      year: null,
-      src,
-      neteaseId: null,
-      inline: false,
-    };
-    grouped.set(artistName, [...(grouped.get(artistName) ?? []), song]);
-  }
-  return [...grouped.entries()].map(([name, songs]) => ({ name, alias: null, note: null, songs }));
-};
-
-const artistList = Array.isArray(interestsRaw.artists)
-  ? interestsRaw.artists.map(artistOf).filter((artist): artist is Artist => artist !== null)
-  : [];
-
-const defaultSongRaw = record(interestsRaw.defaultSong);
-const defaultSongTitle = text(defaultSongRaw.title);
-const resolvedArtists = artistList.length ? artistList : legacyArtists();
-
-export const interests: Interests = {
-  intro: text(interestsRaw.intro),
-  tags: list(interestsRaw.tags),
-  artists: resolvedArtists,
-  defaultSong: defaultSongTitle
-    ? { artist: text(defaultSongRaw.artist) ?? '', title: defaultSongTitle }
-    : null,
-  listenProvider: providerOf(text(interestsRaw.listenProvider)),
-  embedSrc: text(interestsRaw.embedSrc),
-  embedHeight: Number(interestsRaw.embedHeight) > 0 ? Number(interestsRaw.embedHeight) : 86,
-  songCount: resolvedArtists.reduce((sum, artist) => sum + artist.songs.length, 0),
-};
 
 /* ------------------------------------------------------------------ */
 /* 派生                                                               */
