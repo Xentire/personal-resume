@@ -9,6 +9,8 @@
  */
 import raw from '../../content/resume.json';
 import extRaw from '../../content/resume.ext.json';
+import type { ListenProvider } from '../lib/music';
+import { providerOf } from '../lib/music';
 
 /* ------------------------------------------------------------------ */
 /* 类型                                                               */
@@ -136,6 +138,11 @@ export interface Interests {
   artists: Artist[];
   /** 进站时默认选中（不自动播放）的那首 */
   defaultSong: { artist: string; title: string } | null;
+  /** 没有内置音频时，点曲目跳到哪个平台去听 */
+  listenProvider: ListenProvider;
+  /** 官方外链播放器 iframe 地址（可选），填了就渲染一块官方播放器 */
+  embedSrc: string | null;
+  embedHeight: number;
   songCount: number;
 }
 
@@ -511,6 +518,9 @@ export const interests: Interests = {
   defaultSong: defaultSongTitle
     ? { artist: text(defaultSongRaw.artist) ?? '', title: defaultSongTitle }
     : null,
+  listenProvider: providerOf(text(interestsRaw.listenProvider)),
+  embedSrc: text(interestsRaw.embedSrc),
+  embedHeight: Number(interestsRaw.embedHeight) > 0 ? Number(interestsRaw.embedHeight) : 86,
   songCount: resolvedArtists.reduce((sum, artist) => sum + artist.songs.length, 0),
 };
 

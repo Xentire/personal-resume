@@ -107,13 +107,14 @@ tags: [Vite, 踩坑]
 "interests": {
   "intro": "写代码时的背景音。",
   "tags": ["粤语流行", "华语 R&B"],
+  "listenProvider": "netease",
   "defaultSong": { "artist": "方大同", "title": "三人游" },
   "artists": [
     {
       "name": "方大同",
       "alias": "Khalil Fong",
       "songs": [
-        { "title": "三人游", "album": "橙月", "year": "2008", "src": "/audio/khalil/sanrenyou.mp3" }
+        { "title": "三人游", "album": "橙月", "year": "2008" }
       ]
     }
   ]
@@ -121,15 +122,41 @@ tags: [Vite, 踩坑]
 ```
 
 - `artists[].name` 必填，`alias` / `songs[].album` / `year` 可省。
-- `songs[].src` 指向 `public/audio/` 下的文件（也可以写外链），留空则该曲显示「音频待接入」。
 - `defaultSong` 只决定进站时选中哪首，**不会自动播放**——浏览器本来也不允许无交互自动出声。
 - 想让「兴趣爱好」整个板块消失：`artists` 为空且 `intro` / `tags` 都为空时板块自动隐藏。
 - 超过 6 位歌手时桌面换行成第二排，不用改代码。
-- 当前仓库里的 24 首是**占位示例**，`src` 全部指向 `public/audio/_demo/tone.wav`（一段合成音）。
-  换成真实音频后，把 `public/audio/_demo/` 整个删掉即可。
 
-> 关于音频来源：曲库里的商业歌曲有版权，站内建议只放自己合法持有的音频文件，或者把 `src` 指向
-> 官方提供的外链播放地址；不要用抓取来的音频文件部署到公网。
+### 曲目怎么"响"：站内播放 vs 跳转收听
+
+一首歌有两种走法，按 `songs[].src` 有没有值自动切换：
+
+| 情况 | 点击曲目发生什么 |
+| --- | --- |
+| `src` 为空（**默认**） | 新标签页打开 `listenProvider` 对应平台的搜索页，如 `陈奕迅 富士山下` |
+| `src` 有值 | 站内播放，出现进度条、上一首/下一首 |
+
+`listenProvider` 可选 `netease`（网易云，默认）/ `qq`（QQ 音乐）/ `spotify`，链接模板在
+`src/lib/music.ts`，加平台只改一个对象。
+
+**为什么默认是跳转**：站内托管第三方音频 = 在自己域名下复制发行他人录音，不盈利也照样有风险。
+跳转搜索页不复制任何音源，平台页面由平台自己的授权覆盖，这是最干净的做法。
+
+`songs[].src` 只在你**确实拥有使用权**时填（自己录的、明确授权的、CC 协议素材），文件放
+`public/audio/` 下，写 `/audio/xxx.mp3` 就行。不要把自己从流媒体抓下来的文件放进仓库再部署到公网。
+
+### 想在站内直接听到声音：用官方外链播放器
+
+如果你不满足于"点一下跳走"，可以在 `interests` 里加一个官方播放器 iframe：
+
+```json
+"embedSrc": "https://music.163.com/outchain/player?type=0&id=歌单ID&auto=0&height=430",
+"embedHeight": 430
+```
+
+- `embedSrc` 从网易云网页版「生成外链播放器」拿（QQ 音乐同理），是平台**主动提供**的嵌入方式；
+- `auto=0` 保证进站不自动响；
+- 不填就整块不渲染，站内保持纯跳转；
+- 这仍然是"引用平台服务"而非托管音源，属灰色但常见的做法；真要零风险，就用上面的跳转。
 
 ### 项目详情页（多页面）
 
@@ -205,7 +232,7 @@ node scripts/sync-resume.mjs --dump   # 输出 PDF 逐行文本到 resume-lines.
 ├── content/posts/*.md          # 文章（文件名即 slug，_ 开头忽略）
 ├── content/projects/*.md       # 项目详情页长文（文件名 = 项目名，_ 开头忽略）
 ├── public/resume.pdf           # 下载用的简历副本
-├── public/audio/               # 音频（_demo/ 是占位音，接真实曲目后可删）
+├── public/audio/               # 仅放你确实有使用权的音频（默认不用，曲目走官方平台跳转）
 ├── scripts/sync-resume.mjs     # PDF → JSON 解析器
 ├── vercel.json                 # SPA 回退（/projects/xxx 直接访问不 404）
 ├── src/
@@ -230,11 +257,11 @@ node scripts/sync-resume.mjs --dump   # 输出 PDF 逐行文本到 resume-lines.
 - 项目卡顺序为 关键指标条 → mermaid 架构图 → 8:4 双栏（描述 / 技术栈）。
 - 架构图用 mermaid 11（`securityLevel: 'strict'`）按需 `import()`，没有架构图的项目不会加载 mermaid；
   窄屏下保持自然像素宽并在卡片内横向滚动，不压缩成不可读的小图。
-- 兴趣区是「歌手列 + 播放条」：桌面 6 列并排（`lg:grid-cols-6`），窄屏 2 列；点歌手列头展开该列曲目，
-  同时只开一列（手风琴）；点曲目直接播放，`defaultSong` 决定进站时默认选中的那首——**只选中，不自动播放**。
+- 兴趣区是「歌手列 + 收听条」：桌面 6 列并排（`lg:grid-cols-6`），窄屏 2 列；点歌手列头展开该列曲目，
+  同时只开一列（手风琴）；`defaultSong` 决定进站时默认选中的那首——**只选中，不自动播放**。
   展开动画用 `grid-template-rows: 0fr → 1fr`，不测高度所以不抖；曲目逐条 30ms 延迟淡入。
-- 音频放在 `public/audio/` 下，`songs[].src` 写 `/audio/xxx.mp3` 这样的站内路径（也支持外链）。
-  `src` 留空的曲目会显示为「音频待接入」，仍可选中但播放键置灰。
+- 曲目默认跳转到官方平台收听（站内不托管音源）；`songs[].src` 有值时才切成站内播放，
+  文件放 `public/audio/`，写 `/audio/xxx.mp3` 这样的路径。
 
 ## 设计规范
 

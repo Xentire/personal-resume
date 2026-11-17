@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { Artist, Song } from '../../data/resume';
 import { ui } from '../../data/site';
+import type { ListenProvider } from '../../lib/music';
+import { listenUrl, providers } from '../../lib/music';
 
 interface Entry {
   artist: string;
@@ -23,11 +25,7 @@ function Equalizer({ playing, size = 'sm' }: { playing: boolean; size?: 'sm' | '
       {bars.map((index) => (
         <span
           key={index}
-          className={[
-            dims,
-            'rounded-full',
-            playing ? 'eq-bar bg-accent' : 'bg-line-strong',
-          ].join(' ')}
+          className={[dims, 'rounded-full', playing ? 'eq-bar bg-accent' : 'bg-line-strong'].join(' ')}
           style={playing ? { animationDelay: `${index * 140}ms` } : undefined}
         />
       ))}
@@ -47,6 +45,16 @@ function PlayIcon({ playing }: { playing: boolean }) {
   );
 }
 
+function ExternalIcon({ size = 13 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 16 16" fill="none" aria-hidden>
+      <path d="M6 3.5h6.5V10" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M12.2 3.8 6.6 9.4" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+      <path d="M11 10v2.5H3.5V5H6" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
 function StepIcon({ dir }: { dir: 'prev' | 'next' }) {
   return (
     <svg width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden className={dir === 'prev' ? 'rotate-180' : ''}>
@@ -59,16 +67,22 @@ function StepIcon({ dir }: { dir: 'prev' | 'next' }) {
 /**
  * 歌手列 + 曲目 + 播放条。
  *
- * 交互：点歌手列头展开该列曲目（手风琴，同时只开一列，用 grid-template-rows 0fr→1fr 过渡，
- * 高度动画不依赖测量所以不掉帧）；点曲目播放；进站默认选中 defaultSong 但不自动播放。
- * 音频地址来自 resume.ext.json → interests.artists[].songs[].src，指向 public/audio 下的文件。
+ * 两种收听方式，按曲目自动切换：
+ *   1. song.src 有值 → 站内播放（文件由站长自己提供，放在 public/audio/）；
+ *   2. song.src 为空   → 点击跳转到官方平台（网易云 / QQ 音乐 / Spotify）的搜索页收听。
+ * 站内永远不托管第三方音频，所以不存在「把版权歌曲放在自己域名下分发」的问题。
+ *
+ * 交互：点歌手列头展开该列曲目（手风琴，同时只开一列，grid-template-rows 0fr→1fr 过渡，
+ * 高度动画不依赖测量所以不掉帧）；defaultSong 决定进站默认选中，但不自动播放。
  */
 export function MusicShelf({
   artists,
   defaultSong,
+  provider,
 }: {
   artists: Artist[];
   defaultSong: { artist: string; title: string } | null;
+  provider: ListenProvider;
 }) {
   const entries = useMemo<Entry[]>(
     () => artists.flatMap((artist) => artist.songs.map((song) => ({ artist: artist.name, song }))),
@@ -98,6 +112,9 @@ export function MusicShelf({
   const active = entries[current] ?? null;
   const playable = Boolean(active?.song.src);
 
+  const externalOf = (entry: Entry | null): string | null =>
+    entry ? listenUrl(provider, entry.artist, entry.song.title) : null;
+
   useEffect(() => {
     const audio = audioRef.current;
     setTime(0);
@@ -116,20 +133,15 @@ export function MusicShelf({
     }
   }, [current]);
 
-  const startPlay = () => {
-    const audio = audioRef.current;
-    if (!audio) return;
-    void audio
-      .play()
-      .then(() => setPlaying(true))
-      .catch(() => setPlaying(false));
-  };
-
   const toggle = () => {
     const audio = audioRef.current;
     if (!audio || !playable) return;
-    if (audio.paused) startPlay();
-    else {
+    if (audio.paused) {
+      void audio
+        .play()
+        .then(() => setPlaying(true))
+        .catch(() => setPlaying(false));
+    } else {
       audio.pause();
       setPlaying(false);
     }
@@ -137,8 +149,9 @@ export function MusicShelf({
 
   const step = (delta: number) => {
     if (!entries.length) return;
-    resumeAfterSwitch.current = playing;
-    setCurrent((value) => (value + delta + entries.length) % entries.length);
+    const next = (current + delta + entries.length) % entries.length;
+    resumeAfterSwitch.current = playing && Boolean(entries[next]?.song.src);
+    setCurrent(next);
   };
 
   const pick = (index: number) => {
@@ -146,7 +159,6 @@ export function MusicShelf({
       toggle();
       return;
     }
-    // 点另一首就直接播；没接入音频的曲目只做选中
     resumeAfterSwitch.current = Boolean(entries[index]?.song.src);
     setCurrent(index);
   };
@@ -163,6 +175,8 @@ export function MusicShelf({
   if (!artists.length) return null;
 
   const percent = duration > 0 ? Math.min(100, (time / duration) * 100) : 0;
+  const externalUrl = externalOf(active);
+  const platformLabel = providers[provider].label;
 
   return (
     <div className="flex flex-col gap-2.5">
@@ -215,6 +229,35 @@ export function MusicShelf({
                       const index = entries.findIndex((entry) => entry.song === song && entry.artist === artist.name);
                       const isCurrent = index === current;
                       const isPlaying = isCurrent && playing;
+                      const hasAudio = Boolean(song.src);
+                      const rowClass = [
+                        'group flex w-full items-center gap-2 rounded px-1.5 py-[7px] text-left transition-colors duration-150',
+                        isCurrent ? 'text-accent' : 'text-dim hover:bg-elevated hover:text-ink',
+                      ].join(' ');
+                      const inner = (
+                        <>
+                          <span className="grid w-3 shrink-0 place-items-center">
+                            {isPlaying ? (
+                              <Equalizer playing />
+                            ) : (
+                              <span className="font-mono text-[10px] text-faint group-hover:hidden">
+                                {String(songIndex + 1).padStart(2, '0')}
+                              </span>
+                            )}
+                            {!isPlaying ? (
+                              <span className="hidden text-faint group-hover:block">
+                                {hasAudio ? <PlayIcon playing={false} /> : <ExternalIcon size={11} />}
+                              </span>
+                            ) : null}
+                          </span>
+                          <span className="min-w-0 flex-1 truncate text-[12px]">{song.title}</span>
+                          {hasAudio ? null : (
+                            <span className="shrink-0 text-faint opacity-0 transition-opacity duration-150 group-hover:opacity-100">
+                              <ExternalIcon size={11} />
+                            </span>
+                          )}
+                        </>
+                      );
 
                       return (
                         <li
@@ -226,33 +269,29 @@ export function MusicShelf({
                             transform: open ? 'none' : 'translateY(-4px)',
                           }}
                         >
-                          <button
-                            type="button"
-                            onClick={() => pick(index)}
-                            aria-current={isCurrent ? 'true' : undefined}
-                            title={song.src ? `${song.title}${song.year ? ` · ${song.year}` : ''}` : ui.playerLocked}
-                            className={[
-                              'group flex w-full items-center gap-2 rounded px-1.5 py-[7px] text-left transition-colors duration-150',
-                              isCurrent ? 'text-accent' : 'text-dim hover:bg-elevated hover:text-ink',
-                            ].join(' ')}
-                          >
-                            <span className="grid w-3 shrink-0 place-items-center">
-                              {isPlaying ? (
-                                <Equalizer playing />
-                              ) : (
-                                <span className="font-mono text-[10px] text-faint group-hover:hidden">
-                                  {String(songIndex + 1).padStart(2, '0')}
-                                </span>
-                              )}
-                              {!isPlaying ? (
-                                <span className="hidden text-faint group-hover:block">
-                                  <PlayIcon playing={false} />
-                                </span>
-                              ) : null}
-                            </span>
-                            <span className="min-w-0 flex-1 truncate text-[12px]">{song.title}</span>
-                            {song.src ? null : <span aria-hidden className="h-1 w-1 shrink-0 rounded-full bg-faint" />}
-                          </button>
+                          {hasAudio ? (
+                            <button
+                              type="button"
+                              onClick={() => pick(index)}
+                              aria-current={isCurrent ? 'true' : undefined}
+                              title={`${song.title}${song.year ? ` · ${song.year}` : ''}`}
+                              className={rowClass}
+                            >
+                              {inner}
+                            </button>
+                          ) : (
+                            <a
+                              href={listenUrl(provider, artist.name, song.title)}
+                              target="_blank"
+                              rel="noreferrer noopener"
+                              onClick={() => setCurrent(index)}
+                              aria-current={isCurrent ? 'true' : undefined}
+                              title={`在${platformLabel}收听 ${song.title}`}
+                              className={rowClass}
+                            >
+                              {inner}
+                            </a>
+                          )}
                         </li>
                       );
                     })}
@@ -264,7 +303,7 @@ export function MusicShelf({
         })}
       </div>
 
-      {/* 播放条 */}
+      {/* 播放条 / 收听条 */}
       <div className="card flex flex-col gap-3 px-4 py-3 md:flex-row md:items-center md:gap-5">
         <div className="flex min-w-0 flex-1 items-center gap-3">
           <span className="grid h-9 w-9 shrink-0 place-items-center rounded border border-line bg-elevated">
@@ -279,14 +318,17 @@ export function MusicShelf({
         </div>
 
         <div className="flex items-center gap-2.5 md:w-72 lg:w-96">
-          <span className="w-9 shrink-0 text-right font-mono text-[10.5px] text-faint">{formatTime(time)}</span>
+          <span className="w-9 shrink-0 text-right font-mono text-[10.5px] text-faint">
+            {playable ? formatTime(time) : '--:--'}
+          </span>
           <div
             role="slider"
-            tabIndex={0}
+            tabIndex={playable ? 0 : -1}
             aria-label="播放进度"
             aria-valuemin={0}
             aria-valuemax={100}
             aria-valuenow={Math.round(percent)}
+            aria-disabled={playable ? undefined : true}
             onClick={seek}
             onKeyDown={(event) => {
               const audio = audioRef.current;
@@ -297,20 +339,25 @@ export function MusicShelf({
               audio.currentTime = Math.min(audio.duration, Math.max(0, audio.currentTime + delta));
               setTime(audio.currentTime);
             }}
-            className="group relative h-4 flex-1 cursor-pointer outline-none focus-visible:ring-1 focus-visible:ring-accent/60"
+            className={[
+              'group relative h-4 flex-1 outline-none focus-visible:ring-1 focus-visible:ring-accent/60',
+              playable ? 'cursor-pointer' : 'cursor-default',
+            ].join(' ')}
           >
             <span className="absolute inset-x-0 top-1/2 h-[2px] -translate-y-1/2 rounded-full bg-line" />
             <span
               className="absolute top-1/2 h-[2px] -translate-y-1/2 rounded-full bg-accent/70 transition-[width] duration-150"
               style={{ width: `${percent}%` }}
             />
-            <span
-              className="absolute top-1/2 h-1.5 w-1.5 -translate-y-1/2 rounded-full bg-accent opacity-0 transition-opacity duration-150 group-hover:opacity-100"
-              style={{ left: `calc(${percent}% - 3px)` }}
-            />
+            {playable ? (
+              <span
+                className="absolute top-1/2 h-1.5 w-1.5 -translate-y-1/2 rounded-full bg-accent opacity-0 transition-opacity duration-150 group-hover:opacity-100"
+                style={{ left: `calc(${percent}% - 3px)` }}
+              />
+            ) : null}
           </div>
           <span className="w-9 shrink-0 font-mono text-[10.5px] text-faint">
-            {playable ? formatTime(duration) : ui.playerLocked}
+            {playable ? formatTime(duration) : '--:--'}
           </span>
         </div>
 
@@ -323,15 +370,38 @@ export function MusicShelf({
           >
             <StepIcon dir="prev" />
           </button>
-          <button
-            type="button"
-            onClick={toggle}
-            disabled={!playable}
-            aria-label={playing ? ui.playerPause : ui.playerPlay}
-            className="grid h-9 w-9 place-items-center rounded border border-accent/40 bg-accent/15 text-accent transition-colors duration-150 hover:bg-accent/25 disabled:cursor-not-allowed disabled:opacity-40"
-          >
-            <PlayIcon playing={playing} />
-          </button>
+
+          {playable ? (
+            <button
+              type="button"
+              onClick={toggle}
+              aria-label={playing ? ui.playerPause : ui.playerPlay}
+              className="grid h-9 w-9 place-items-center rounded border border-accent/40 bg-accent/15 text-accent transition-colors duration-150 hover:bg-accent/25"
+            >
+              <PlayIcon playing={playing} />
+            </button>
+          ) : externalUrl ? (
+            <a
+              href={externalUrl}
+              target="_blank"
+              rel="noreferrer noopener"
+              aria-label={`在${platformLabel}收听`}
+              title={`在${platformLabel}收听`}
+              className="grid h-9 w-9 place-items-center rounded border border-accent/40 bg-accent/15 text-accent transition-colors duration-150 hover:bg-accent/25"
+            >
+              <ExternalIcon size={14} />
+            </a>
+          ) : (
+            <button
+              type="button"
+              disabled
+              aria-label={ui.playerPlay}
+              className="grid h-9 w-9 place-items-center rounded border border-accent/40 bg-accent/15 text-accent opacity-40"
+            >
+              <PlayIcon playing={false} />
+            </button>
+          )}
+
           <button
             type="button"
             onClick={() => step(1)}
@@ -343,7 +413,9 @@ export function MusicShelf({
         </div>
       </div>
 
-      <p className="px-0.5 font-mono text-[10.5px] text-faint">{ui.playerHint}</p>
+      <p className="px-0.5 font-mono text-[10.5px] text-faint">
+        {playable ? ui.playerHint : ui.playerExternalHint.replace('{platform}', platformLabel)}
+      </p>
 
       {active?.song.src ? (
         <audio

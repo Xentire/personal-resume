@@ -5,7 +5,7 @@ import { MusicShelf } from '../ui/MusicShelf';
 import { Tag } from '../ui/Primitives';
 
 export function Interests() {
-  const { intro, tags, artists, songCount, defaultSong } = interests;
+  const { intro, tags, artists, songCount, defaultSong, listenProvider, embedSrc } = interests;
 
   if (!intro && !tags.length && !artists.length) return null;
 
@@ -37,7 +37,27 @@ export function Interests() {
           </div>
         </div>
 
-        {artists.length ? <MusicShelf artists={artists} defaultSong={defaultSong} /> : null}
+        {artists.length ? (
+          <MusicShelf artists={artists} defaultSong={defaultSong} provider={listenProvider} />
+        ) : null}
+
+        {embedSrc ? (
+          <div className="card overflow-hidden p-3">
+            <div className="mb-2 flex items-center justify-between gap-3 px-1">
+              <span className="label-mono">官方外链播放器</span>
+              <span className="font-mono text-[10.5px] text-faint">via {listenProvider}</span>
+            </div>
+            <iframe
+              src={embedSrc}
+              title="官方外链播放器"
+              height={interests.embedHeight}
+              frameBorder="0"
+              allow="autoplay; encrypted-media"
+              loading="lazy"
+              className="w-full rounded border border-line"
+            />
+          </div>
+        ) : null}
       </div>
     </Section>
   );

@@ -155,9 +155,10 @@
     }
   ],
   "interests": {
-    "_comment": "artists 是每个歌手一列；songs[].src 指向 public/audio 下的音频（如 /audio/eason/fushishanxia.mp3），留空则该曲显示为「音频待接入」。defaultSong 是进站时默认选中的那首（只选中，不自动播放）。下面 6 列曲目是占位示例，src 全部指向 public/audio/_demo/tone.wav，换成真实文件后把 _demo 删掉。",
+    "_comment": "artists 是每个歌手一列。songs[].src 是站内音频路径（只有你自己拥有合法使用权的文件才填，如自己录制/授权的音频，放 public/audio/ 下）；留空则点击曲目跳转到 listenProvider 指定的平台搜索页收听，站内不托管任何第三方音频。listenProvider: netease | qq | spotify。defaultSong 是进站时默认选中的那首（只选中，不自动播放）。",
     "intro": "写代码时的背景音。按歌手分成几列，点开就是那一路的歌单。",
     "tags": ["粤语流行", "华语 R&B", "技术播客"],
+    "listenProvider": "netease",
     "defaultSong": { "artist": "方大同", "title": "三人游" },
     "artists": [
       {
@@ -165,10 +166,10 @@
         "alias": "Eason Chan",
         "note": "粤语 / 国语",
         "songs": [
-          { "title": "富士山下", "album": "What's Going On…?", "year": "2006", "src": "/audio/_demo/tone.wav" },
-          { "title": "十年", "album": "黑白灰", "year": "2003", "src": "/audio/_demo/tone.wav" },
-          { "title": "好久不见", "album": "认了吧", "year": "2007", "src": "/audio/_demo/tone.wav" },
-          { "title": "浮夸", "album": "U87", "year": "2005", "src": "/audio/_demo/tone.wav" }
+          { "title": "富士山下", "album": "What's Going On…?", "year": "2006" },
+          { "title": "十年", "album": "黑白灰", "year": "2003" },
+          { "title": "好久不见", "album": "认了吧", "year": "2007" },
+          { "title": "浮夸", "album": "U87", "year": "2005" }
         ]
       },
       {
@@ -176,10 +177,10 @@
         "alias": "Jay Chou",
         "note": "华语流行",
         "songs": [
-          { "title": "晴天", "album": "叶惠美", "year": "2003", "src": "/audio/_demo/tone.wav" },
-          { "title": "七里香", "album": "七里香", "year": "2004", "src": "/audio/_demo/tone.wav" },
-          { "title": "稻香", "album": "魔杰座", "year": "2008", "src": "/audio/_demo/tone.wav" },
-          { "title": "夜曲", "album": "十一月的萧邦", "year": "2005", "src": "/audio/_demo/tone.wav" }
+          { "title": "晴天", "album": "叶惠美", "year": "2003" },
+          { "title": "七里香", "album": "七里香", "year": "2004" },
+          { "title": "稻香", "album": "魔杰座", "year": "2008" },
+          { "title": "夜曲", "album": "十一月的萧邦", "year": "2005" }
         ]
       },
       {
@@ -187,10 +188,10 @@
         "alias": "Stefanie Sun",
         "note": "华语流行",
         "songs": [
-          { "title": "遇见", "album": "The Moment", "year": "2003", "src": "/audio/_demo/tone.wav" },
-          { "title": "天黑黑", "album": "孙燕姿", "year": "2000", "src": "/audio/_demo/tone.wav" },
-          { "title": "绿光", "album": "风筝", "year": "2001", "src": "/audio/_demo/tone.wav" },
-          { "title": "我怀念的", "album": "逆光", "year": "2007", "src": "/audio/_demo/tone.wav" }
+          { "title": "遇见", "album": "The Moment", "year": "2003" },
+          { "title": "天黑黑", "album": "孙燕姿", "year": "2000" },
+          { "title": "绿光", "album": "风筝", "year": "2001" },
+          { "title": "我怀念的", "album": "逆光", "year": "2007" }
         ]
       },
       {
@@ -198,10 +199,10 @@
         "alias": "David Tao",
         "note": "华语 R&B",
         "songs": [
-          { "title": "爱很简单", "album": "David Tao", "year": "1997", "src": "/audio/_demo/tone.wav" },
-          { "title": "普通朋友", "album": "I'm OK", "year": "1999", "src": "/audio/_demo/tone.wav" },
-          { "title": "就是爱你", "album": "太平盛世", "year": "2005", "src": "/audio/_demo/tone.wav" },
-          { "title": "小镇姑娘", "album": "I'm OK", "year": "1999", "src": "/audio/_demo/tone.wav" }
+          { "title": "爱很简单", "album": "David Tao", "year": "1997" },
+          { "title": "普通朋友", "album": "I'm OK", "year": "1999" },
+          { "title": "就是爱你", "album": "太平盛世", "year": "2005" },
+          { "title": "小镇姑娘", "album": "I'm OK", "year": "1999" }
         ]
       },
       {
@@ -209,10 +210,10 @@
         "alias": "Leehom Wang",
         "note": "华语流行",
         "songs": [
-          { "title": "唯一", "album": "唯一", "year": "2001", "src": "/audio/_demo/tone.wav" },
-          { "title": "心中的日月", "album": "心中的日月", "year": "2004", "src": "/audio/_demo/tone.wav" },
-          { "title": "大城小爱", "album": "盖世英雄", "year": "2005", "src": "/audio/_demo/tone.wav" },
-          { "title": "落叶归根", "album": "改变自己", "year": "2007", "src": "/audio/_demo/tone.wav" }
+          { "title": "唯一", "album": "唯一", "year": "2001" },
+          { "title": "心中的日月", "album": "心中的日月", "year": "2004" },
+          { "title": "大城小爱", "album": "盖世英雄", "year": "2005" },
+          { "title": "落叶归根", "album": "改变自己", "year": "2007" }
         ]
       },
       {
@@ -220,10 +221,10 @@
         "alias": "Khalil Fong",
         "note": "Soul / R&B",
         "songs": [
-          { "title": "三人游", "album": "橙月", "year": "2008", "src": "/audio/_demo/tone.wav" },
-          { "title": "爱爱爱", "album": "爱爱爱", "year": "2006", "src": "/audio/_demo/tone.wav" },
-          { "title": "春风吹", "album": "Soul Boy", "year": "2005", "src": "/audio/_demo/tone.wav" },
-          { "title": "特别的人", "album": "危险世界", "year": "2014", "src": "/audio/_demo/tone.wav" }
+          { "title": "三人游", "album": "橙月", "year": "2008" },
+          { "title": "爱爱爱", "album": "爱爱爱", "year": "2006" },
+          { "title": "春风吹", "album": "Soul Boy", "year": "2005" },
+          { "title": "特别的人", "album": "危险世界", "year": "2014" }
         ]
       }
     ]
