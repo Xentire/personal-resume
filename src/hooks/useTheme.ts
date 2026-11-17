@@ -35,11 +35,7 @@ function applyDom(id: string) {
   if (meta) meta.setAttribute('content', theme.base);
 }
 
-export function setTheme(id: string) {
-  if (!isThemeId(id) || id === current) {
-    if (isThemeId(id)) applyDom(id);
-    return;
-  }
+function commit(id: string) {
   current = id;
   applyDom(id);
   try {
@@ -48,6 +44,41 @@ export function setTheme(id: string) {
     /* 写入失败不影响当前会话 */
   }
   notify();
+}
+
+/** 浏览器是否支持同文档 view transition（Chrome/Edge 111+、Safari 18+；Firefox 暂不支持） */
+type ViewTransitionCapable = Document & {
+  startViewTransition?: (callback: () => void) => { finished: Promise<void> };
+};
+
+function reducedMotion() {
+  return typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+}
+
+export function setTheme(id: string) {
+  if (!isThemeId(id) || id === current) {
+    if (isThemeId(id)) applyDom(id);
+    return;
+  }
+
+  /*
+   * 深浅**跨越**（深 ↔ 纸白）和深色互切的代价不是一个量级：
+   * 深色主题之间只改 5 个背景变量，文字的计算样式完全没变，浏览器可以整块跳过；
+   * 纸白连 ink/dim/faint/accent/signal 一起改，等于给文档里每个元素都换了 color，
+   * 触发全文重算样式 + 全部字形重新栅格化（实测 demo 页单帧 15–20ms，比深色互切多掉 1 帧）。
+   *
+   * 所以只在跨越深浅时用一次 160ms 交叉淡入，把那一帧藏到旧快照后面：
+   * 新快照准备期间的耗时不会被看见，真正播的淡入由合成器跑、不占主线程。
+   * 深色互切本来就顺（没有掉帧），保持瞬时切换，不引入多余动效。
+   * 不支持 view transition 的浏览器直接瞬时切换（等于改造前的行为）。
+   */
+  const doc = document as ViewTransitionCapable;
+  const crossesTone = themeById(current).tone !== themeById(id).tone;
+  if (crossesTone && typeof doc.startViewTransition === 'function' && !reducedMotion()) {
+    doc.startViewTransition(() => commit(id));
+    return;
+  }
+  commit(id);
 }
 
 function subscribe(listener: () => void) {

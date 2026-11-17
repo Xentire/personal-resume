@@ -251,6 +251,17 @@ body {
   }
 }
 
+/**
+ * 主题切换的交叉淡入（配合 hooks/useTheme.ts 里的 startViewTransition）。
+ * 只收短时长：默认 250ms 会让换色显得"慢半拍"，160ms 刚好盖住那一次重绘。
+ * 淡入由合成器播放，主线程该付的重上色成本照付，只是不再出现在肉眼这一帧上。
+ */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 160ms;
+  animation-timing-function: ease-out;
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
@@ -261,6 +272,12 @@ body {
     opacity: 1;
     transform: none;
     transition: none;
+  }
+
+  /* 关掉换色的交叉淡入：直接瞬时切换，不做任何过渡 */
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none;
   }
 
   *,
