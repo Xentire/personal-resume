@@ -3,18 +3,26 @@
 @tailwind utilities;
 
 /**
- * 颜色令牌 = CSS 变量。切换主题只覆盖「背景层」五个变量（base/surface/elevated/line/line-strong），
- * 文字与强调色保持不动，因此任何主题下对比度都不变。
+ * 颜色令牌 = CSS 变量。
+ *
+ * 深色主题只覆盖「背景层」五个变量（base/surface/elevated/line/line-strong），
+ * 文字与强调色共用 :root 的值，因此各深色主题之间对比度恒定。
+ *
+ * 浅色主题（paper）必须连文字层一起覆盖 —— 白底上沿用浅灰文字会直接不可读，
+ * 强调色/信号色也要压深才能在白底上达到 4.5:1。所以主题块可以覆盖任意令牌，
+ * 只是深色主题「碰巧」不需要覆盖文字而已。
+ *
  * 想加新主题：在 index.css 加一段 [data-theme='xxx'] 覆盖，再在 src/data/theme.ts 的数组里加一项。
  */
 :root {
   color-scheme: dark;
 
-  /* 文字与强调色：所有主题共用 */
+  /* 文字与强调色：深色主题共用 */
   --c-ink: 231 235 243;
   --c-dim: 139 149 167;
   --c-faint: 92 101 119;
   --c-accent: 76 141 255;
+  --c-accent-hover: 63 126 232;
   --c-signal: 226 178 90;
 }
 
@@ -67,6 +75,36 @@
   --c-line-strong: 70 57 46;
 }
 
+/**
+ * 纸白（日间）：唯一的浅色主题。
+ * 底色纯白对应需求里的「白天全白」；卡片靠 1px 描边 + 极浅的 surface 与页面分层，
+ * 不使用阴影（与深色主题同一套「靠描边分层」的做法）。
+ *
+ * 文字与强调色必须在这里重新定义：深色那套浅灰字放在白底上对比度只有 1.1:1。
+ * 数值口径：
+ *   ink   #15181E ≈ 17.8:1
+ *   dim   #4F5764 ≈ 7.3:1
+ *   faint #6E7786 ≈ 4.6:1（只用于 mono 小标签，保留深色主题里"弱化"的观感）
+ *   accent #1F6FEB ≈ 4.6:1（白底上的可点击文字要 ≥4.5:1）
+ *   signal #966610 ≈ 5.0:1
+ */
+[data-theme='paper'] {
+  color-scheme: light;
+
+  --c-base: 255 255 255;
+  --c-surface: 250 251 253;
+  --c-elevated: 243 246 250;
+  --c-line: 228 233 241;
+  --c-line-strong: 200 209 223;
+
+  --c-ink: 21 24 30;
+  --c-dim: 79 87 100;
+  --c-faint: 110 119 134;
+  --c-accent: 31 111 235;
+  --c-accent-hover: 24 95 205;
+  --c-signal: 150 102 16;
+}
+
 html {
   scroll-behavior: smooth;
   -webkit-tap-highlight-color: transparent;
@@ -80,7 +118,7 @@ body {
 
 ::selection {
   background-color: rgb(var(--c-accent) / 0.28);
-  color: #ffffff;
+  color: rgb(var(--c-ink));
 }
 
 ::-webkit-scrollbar {
@@ -120,7 +158,7 @@ body {
   }
 
   .btn-primary {
-    @apply inline-flex items-center gap-2 rounded-card bg-accent px-5 py-2.5 text-sm font-medium text-white transition-colors duration-150 hover:bg-[#3F7EE8];
+    @apply inline-flex items-center gap-2 rounded-card bg-accent px-5 py-2.5 text-sm font-medium text-white transition-colors duration-150 hover:bg-accent-hover;
   }
 
   .btn-ghost {

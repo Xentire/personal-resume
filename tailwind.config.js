@@ -18,6 +18,7 @@ export default {
         dim: 'rgb(var(--c-dim) / <alpha-value>)',
         faint: 'rgb(var(--c-faint) / <alpha-value>)',
         accent: 'rgb(var(--c-accent) / <alpha-value>)',
+        'accent-hover': 'rgb(var(--c-accent-hover) / <alpha-value>)',
         signal: 'rgb(var(--c-signal) / <alpha-value>)',
       },
       maxWidth: {

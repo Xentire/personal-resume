@@ -222,6 +222,8 @@ node scripts/sync-resume.mjs --dump   # 输出 PDF 逐行文本到 resume-lines.
 | 强调色 / 指标色 | `#4C8DFF` / `#E2B25A` |
 | 版心 / 圆角 | `1400px` / `10px` |
 
+浅色主题（`paper`）的对应值见下一节，两套都定义在 `src/index.css` 的 CSS 变量里。
+
 上表的值实际定义在 `src/index.css` 的 CSS 变量里，`tailwind.config.js` 只把 `bg-base`、`text-ink`
 这类类名映射到变量，所以换主题不需要改任何组件。
 
@@ -231,7 +233,7 @@ node scripts/sync-resume.mjs --dump   # 输出 PDF 逐行文本到 resume-lines.
 
 ## 换配色（主题）
 
-导航栏右侧有一个小按钮（移动端在汉堡菜单底部），点开可选 6 套深色氛围：
+导航栏右侧有一个小按钮（移动端在汉堡菜单底部），点开可选 6 套深色氛围 + 1 套浅色：
 
 | id | 名称 | 说明 |
 | --- | --- | --- |
@@ -241,11 +243,26 @@ node scripts/sync-resume.mjs --dump   # 输出 PDF 逐行文本到 resume-lines.
 | `forest` | 墨绿 | 低饱和绿 |
 | `plum` | 暗紫 | 夜紫 |
 | `clay` | 赭石 | 暖棕 |
+| `paper` | 纸白 | 唯一的浅色主题，纯白底 `#FFFFFF`，日间用 |
 
-- **只切换背景层**：`--c-base / --c-surface / --c-elevated / --c-line / --c-line-strong`，文字与强调色不动，
-  所以每套主题的对比度都一致，不会出现「某个主题字看不清」。
+- **深色主题只切换背景层**：`--c-base / --c-surface / --c-elevated / --c-line / --c-line-strong`，
+  文字与强调色不动，所以 6 套深色之间对比度恒定，不会出现「某个主题字看不清」。
+- **`paper` 是例外**：白底上沿用浅灰文字只有 1.1:1 对比度，所以它在 `index.css` 里连
+  `--c-ink / --c-dim / --c-faint / --c-accent / --c-signal` 一起覆盖，并把 `color-scheme` 切成 `light`
+  （原生滚动条、表单控件跟着变）。实测对比度：
+
+  | 令牌 | 值 | 白底对比度 |
+  | --- | --- | --- |
+  | ink | `#15181E` | 17.8:1 |
+  | dim | `#4F5764` | 7.3:1 |
+  | faint | `#6E7786` | 4.5:1 |
+  | accent | `#1F6FEB` | 4.6:1 |
+  | signal | `#966610` | 5.0:1 |
+
+  强调色在浅色下压深到 `#1F6FEB`（原 `#4C8DFF` 在白底只有 2.6:1，作为可点击文字不合格），
+  所以按钮 hover 也不能写死色值，改用 `--c-accent-hover` 令牌。
 - **记忆在本机**：选择写入 `localStorage['portfolio-theme']`，刷新、关浏览器都还在；
-  但它是浏览器本地的，**不同访客互不影响**（你换成墨绿，面试官打开仍是默认的深夜黑）。
+  但它是浏览器本地的，**不同访客互不影响**（你换成纸白，面试官打开仍是默认的深夜黑）。
   没有后端、没有账号系统，天然隔离。
 - **首屏不闪**：`index.html` 里有一段内联脚本在 React 挂载前就按 localStorage 写好 `data-theme`。
 - **架构图跟随**：mermaid 的颜色变量从 CSS 变量读，切主题后自动重绘；`<meta name="theme-color">` 同步更新。
@@ -268,9 +285,13 @@ node scripts/sync-resume.mjs --dump   # 输出 PDF 逐行文本到 resume-lines.
 2. `src/data/theme.ts` 的 `themes` 数组加一项：`{ id: 'sand', label: '沙', hint: '暖', base: '#1A1712', chip: '#7A6A50' }`
    （`base` 是真底色，给地址栏用；`chip` 只是菜单里那个小圆点的中间调颜色，因为真底色太暗看不出来）
 
-> 如果想做「白天全白 / 粉色」这类**浅色**主题，只换背景层不够——文字与卡片层级也要跟着反转，
-> 属于另一档改造：在 `index.css` 里给该主题同时覆盖 `--c-ink / --c-dim / --c-faint / --c-line*` 并加
-> `color-scheme: light`，再检查一遍每处对比度。组件因为全走令牌，不需要改。
+加**浅色**主题照 `paper` 那段抄：背景层反过来（base 最亮、elevated 略暗）、文字层一起覆盖、
+`color-scheme: light`、强调色压深到 ≥4.5:1。组件因为全走令牌，不需要改。
+
+> 想改默认主题：`src/data/theme.ts` 的 `DEFAULT_THEME` 改成 `'paper'` 即可（访客没手动选过就走默认）。
+
+> **命名坑**：调色板里有一个颜色叫 `base`，于是 `text-base` 会被 Tailwind 当成**颜色**类而不是字号，
+> 在深色主题下等于把文字涂成底色（不可见）。要字号请用 `text-[16px]` 之类，不要用 `text-base`。
 
 ## 自定义
 

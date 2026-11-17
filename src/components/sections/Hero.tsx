@@ -41,7 +41,7 @@ export function Hero() {
               {profile.name}
             </h1>
 
-            <p className="mt-4 text-[15px] leading-7 text-dim md:text-base">
+            <p className="mt-4 text-[15px] leading-7 text-dim md:text-[16px]">
               <span className="text-faint">求职方向</span>
               <span aria-hidden className="mx-2 text-line">
                 /
