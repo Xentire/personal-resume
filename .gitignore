@@ -16,6 +16,19 @@ resume-lines.txt
 # WorkBuddy 本地记忆与项目元数据
 .workbuddy
 
+# 本地环境变量与密钥（本项目是纯静态站，正常运行不需要；留着防止误提交）
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+
+# 其它包管理器的锁文件（本项目用 npm，package-lock.json 是唯一来源）
+pnpm-lock.yaml
+pnpm-workspace.yaml
+yarn.lock
+
 # 本地截图产物
 preview
 
