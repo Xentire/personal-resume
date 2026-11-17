@@ -20,3 +20,18 @@ export function listenUrl(provider: ListenProvider, artist: string, title: strin
   const query = [artist, title].filter(Boolean).join(' ');
   return providers[provider].search + encodeURIComponent(query);
 }
+
+/** 有单曲 id 时直接落到单曲页，比搜索页准 */
+export function songUrl(provider: ListenProvider, id: number | null, artist: string, title: string): string {
+  if (id && provider === 'netease') return `https://music.163.com/#/song?id=${id}`;
+  return listenUrl(provider, artist, title);
+}
+
+/**
+ * 网易云官方外链播放器（平台自己提供的嵌入方式，不复制音频文件）。
+ * auto=0 保证不主动出声，由访客在播放器里点播放。
+ * 注意：VIP / 付费曲目在匿名上下文里不会出声（连试听都不给），只有免费曲目可用。
+ */
+export function outchainUrl(id: number, auto = false): string {
+  return `https://music.163.com/outchain/player?type=2&id=${id}&auto=${auto ? 1 : 0}&height=66`;
+}

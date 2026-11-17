@@ -120,8 +120,12 @@ export interface Song {
   title: string;
   album: string | null;
   year: string | null;
-  /** 音频地址（public/audio 下的相对路径或外链）；为空表示还没接入文件 */
+  /** 音频地址（public/audio 下的相对路径或外链）；为空表示没有站内音频 */
   src: string | null;
+  /** 网易云单曲 id：跳转可以直接落到单曲页，而不是搜索结果 */
+  neteaseId: number | null;
+  /** 该曲能否用网易云官方外链播放器站内播放（实测只有免费曲目可以，VIP 匿名一律不出声） */
+  inline: boolean;
 }
 
 export interface Artist {
@@ -475,7 +479,15 @@ const songOf = (value: unknown): Song | null => {
   const row = record(value);
   const title = text(row.title);
   if (!title) return null;
-  return { title, album: text(row.album), year: text(row.year), src: text(row.src) };
+  const neteaseId = Number(row.neteaseId);
+  return {
+    title,
+    album: text(row.album),
+    year: text(row.year),
+    src: text(row.src),
+    neteaseId: Number.isFinite(neteaseId) && neteaseId > 0 ? neteaseId : null,
+    inline: row.inline === true,
+  };
 };
 
 const artistOf = (value: unknown): Artist | null => {
@@ -497,7 +509,14 @@ const legacyArtists = (): Artist[] => {
     const src = text(row.src);
     if (!src) continue;
     const artistName = text(row.artist) ?? '未分组';
-    const song: Song = { title: text(row.title) ?? '未命名曲目', album: null, year: null, src };
+    const song: Song = {
+      title: text(row.title) ?? '未命名曲目',
+      album: null,
+      year: null,
+      src,
+      neteaseId: null,
+      inline: false,
+    };
     grouped.set(artistName, [...(grouped.get(artistName) ?? []), song]);
   }
   return [...grouped.entries()].map(([name, songs]) => ({ name, alias: null, note: null, songs }));

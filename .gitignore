@@ -21,4 +21,6 @@ preview
 # headless 浏览器临时 profile
 .edge-profile
 .edge-profile-*
+.edge-verify
+.edge-verify-*
 vite.config.ts.timestamp-*.mjs

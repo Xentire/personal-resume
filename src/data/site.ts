@@ -79,6 +79,7 @@ export const ui = {
   playerEmpty: '还没选歌',
   playerHint: '点歌手名展开曲目，点曲目播放',
   playerExternalHint: '站内不托管音频 · 点曲目在 {platform} 打开收听',
+  playerEmbedHint: '{platform}官方播放器 · 试听/播放由平台提供',
   playerSurprise: '挑一首听听',
   playerLocked: '跳转收听',
   playerArtists: '歌手',

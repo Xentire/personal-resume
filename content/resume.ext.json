@@ -166,10 +166,12 @@
         "alias": "Eason Chan",
         "note": "粤语 / 国语",
         "songs": [
-          { "title": "富士山下", "album": "What's Going On…?", "year": "2006" },
-          { "title": "十年", "album": "黑白灰", "year": "2003" },
-          { "title": "好久不见", "album": "认了吧", "year": "2007" },
-          { "title": "浮夸", "album": "U87", "year": "2005" }
+          { "title": "任我行", "album": "The Key", "year": "2013", "neteaseId": 27483202 },
+          { "title": "落花流水", "album": "Solidays 新曲+精选", "neteaseId": 64922 },
+          { "title": "沙龙", "album": "H³M", "year": "2009", "neteaseId": 64833 },
+          { "title": "Shall We Talk", "album": "Shall We Dance? Shall We Talk!", "year": "2001", "neteaseId": 67411 },
+          { "title": "葡萄成熟时", "album": "U87", "year": "2005", "neteaseId": 66285 },
+          { "title": "阿猫阿狗", "album": "The Key", "year": "2013", "neteaseId": 27483200, "inline": true }
         ]
       },
       {

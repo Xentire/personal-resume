@@ -2,11 +2,21 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import type { Artist, Song } from '../../data/resume';
 import { ui } from '../../data/site';
 import type { ListenProvider } from '../../lib/music';
-import { listenUrl, providers } from '../../lib/music';
+import { outchainUrl, providers, songUrl } from '../../lib/music';
 
 interface Entry {
   artist: string;
   song: Song;
+}
+
+/** local = 站内音频；embed = 网易云官方外链播放器；external = 跳转到平台 */
+type Mode = 'local' | 'embed' | 'external';
+
+function modeOf(song: Song | undefined): Mode {
+  if (!song) return 'external';
+  if (song.src) return 'local';
+  if (song.inline && song.neteaseId) return 'embed';
+  return 'external';
 }
 
 function formatTime(seconds: number): string {
@@ -65,15 +75,15 @@ function StepIcon({ dir }: { dir: 'prev' | 'next' }) {
 }
 
 /**
- * 歌手列 + 曲目 + 播放条。
+ * 歌手列 + 曲目 + 收听条。
  *
- * 两种收听方式，按曲目自动切换：
- *   1. song.src 有值 → 站内播放（文件由站长自己提供，放在 public/audio/）；
- *   2. song.src 为空   → 点击跳转到官方平台（网易云 / QQ 音乐 / Spotify）的搜索页收听。
- * 站内永远不托管第三方音频，所以不存在「把版权歌曲放在自己域名下分发」的问题。
+ * 三种收听方式，按曲目自动切换：
+ *   local    —— song.src 有值：站内播放（文件在 public/audio/）
+ *   embed    —— song.inline + neteaseId：嵌官方外链播放器。实测只有免费曲目会出声，
+ *               VIP 曲目在匿名上下文里连试听都不给，所以这个开关不要随便开
+ *   external —— 其余情况：点开平台单曲页 / 搜索页收听
  *
- * 交互：点歌手列头展开该列曲目（手风琴，同时只开一列，grid-template-rows 0fr→1fr 过渡，
- * 高度动画不依赖测量所以不掉帧）；defaultSong 决定进站默认选中，但不自动播放。
+ * 站内永远不托管第三方音频。
  */
 export function MusicShelf({
   artists,
@@ -110,10 +120,8 @@ export function MusicShelf({
   const resumeAfterSwitch = useRef(false);
 
   const active = entries[current] ?? null;
-  const playable = Boolean(active?.song.src);
-
-  const externalOf = (entry: Entry | null): string | null =>
-    entry ? listenUrl(provider, entry.artist, entry.song.title) : null;
+  const mode = modeOf(active?.song);
+  const playable = mode === 'local';
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -150,7 +158,7 @@ export function MusicShelf({
   const step = (delta: number) => {
     if (!entries.length) return;
     const next = (current + delta + entries.length) % entries.length;
-    resumeAfterSwitch.current = playing && Boolean(entries[next]?.song.src);
+    resumeAfterSwitch.current = playing && modeOf(entries[next]?.song) === 'local';
     setCurrent(next);
   };
 
@@ -159,7 +167,7 @@ export function MusicShelf({
       toggle();
       return;
     }
-    resumeAfterSwitch.current = Boolean(entries[index]?.song.src);
+    resumeAfterSwitch.current = modeOf(entries[index]?.song) === 'local' ? playing : false;
     setCurrent(index);
   };
 
@@ -175,8 +183,9 @@ export function MusicShelf({
   if (!artists.length) return null;
 
   const percent = duration > 0 ? Math.min(100, (time / duration) * 100) : 0;
-  const externalUrl = externalOf(active);
   const platformLabel = providers[provider].label;
+  const externalUrl = active ? songUrl(provider, active.song.neteaseId, active.artist, active.song.title) : null;
+  const embedSrc = mode === 'embed' && active?.song.neteaseId ? outchainUrl(active.song.neteaseId, true) : null;
 
   return (
     <div className="flex flex-col gap-2.5">
@@ -229,7 +238,8 @@ export function MusicShelf({
                       const index = entries.findIndex((entry) => entry.song === song && entry.artist === artist.name);
                       const isCurrent = index === current;
                       const isPlaying = isCurrent && playing;
-                      const hasAudio = Boolean(song.src);
+                      const songMode = modeOf(song);
+                      const inPlace = songMode !== 'external';
                       const rowClass = [
                         'group flex w-full items-center gap-2 rounded px-1.5 py-[7px] text-left transition-colors duration-150',
                         isCurrent ? 'text-accent' : 'text-dim hover:bg-elevated hover:text-ink',
@@ -246,12 +256,12 @@ export function MusicShelf({
                             )}
                             {!isPlaying ? (
                               <span className="hidden text-faint group-hover:block">
-                                {hasAudio ? <PlayIcon playing={false} /> : <ExternalIcon size={11} />}
+                                {inPlace ? <PlayIcon playing={false} /> : <ExternalIcon size={11} />}
                               </span>
                             ) : null}
                           </span>
                           <span className="min-w-0 flex-1 truncate text-[12px]">{song.title}</span>
-                          {hasAudio ? null : (
+                          {inPlace ? null : (
                             <span className="shrink-0 text-faint opacity-0 transition-opacity duration-150 group-hover:opacity-100">
                               <ExternalIcon size={11} />
                             </span>
@@ -269,7 +279,7 @@ export function MusicShelf({
                             transform: open ? 'none' : 'translateY(-4px)',
                           }}
                         >
-                          {hasAudio ? (
+                          {inPlace ? (
                             <button
                               type="button"
                               onClick={() => pick(index)}
@@ -281,7 +291,7 @@ export function MusicShelf({
                             </button>
                           ) : (
                             <a
-                              href={listenUrl(provider, artist.name, song.title)}
+                              href={songUrl(provider, song.neteaseId, artist.name, song.title)}
                               target="_blank"
                               rel="noreferrer noopener"
                               onClick={() => setCurrent(index)}
@@ -303,7 +313,7 @@ export function MusicShelf({
         })}
       </div>
 
-      {/* 播放条 / 收听条 */}
+      {/* 收听条 */}
       <div className="card flex flex-col gap-3 px-4 py-3 md:flex-row md:items-center md:gap-5">
         <div className="flex min-w-0 flex-1 items-center gap-3">
           <span className="grid h-9 w-9 shrink-0 place-items-center rounded border border-line bg-elevated">
@@ -317,49 +327,63 @@ export function MusicShelf({
           </span>
         </div>
 
-        <div className="flex items-center gap-2.5 md:w-72 lg:w-96">
-          <span className="w-9 shrink-0 text-right font-mono text-[10.5px] text-faint">
-            {playable ? formatTime(time) : '--:--'}
-          </span>
-          <div
-            role="slider"
-            tabIndex={playable ? 0 : -1}
-            aria-label="播放进度"
-            aria-valuemin={0}
-            aria-valuemax={100}
-            aria-valuenow={Math.round(percent)}
-            aria-disabled={playable ? undefined : true}
-            onClick={seek}
-            onKeyDown={(event) => {
-              const audio = audioRef.current;
-              if (!audio || !Number.isFinite(audio.duration) || audio.duration <= 0) return;
-              if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
-              event.preventDefault();
-              const delta = event.key === 'ArrowRight' ? 5 : -5;
-              audio.currentTime = Math.min(audio.duration, Math.max(0, audio.currentTime + delta));
-              setTime(audio.currentTime);
-            }}
-            className={[
-              'group relative h-4 flex-1 outline-none focus-visible:ring-1 focus-visible:ring-accent/60',
-              playable ? 'cursor-pointer' : 'cursor-default',
-            ].join(' ')}
-          >
-            <span className="absolute inset-x-0 top-1/2 h-[2px] -translate-y-1/2 rounded-full bg-line" />
-            <span
-              className="absolute top-1/2 h-[2px] -translate-y-1/2 rounded-full bg-accent/70 transition-[width] duration-150"
-              style={{ width: `${percent}%` }}
+        {embedSrc ? (
+          <div className="min-w-0 md:w-[336px] lg:w-[420px]">
+            <iframe
+              key={embedSrc}
+              src={embedSrc}
+              title={`${platformLabel}播放器`}
+              height={66}
+              frameBorder="0"
+              allow="autoplay; encrypted-media"
+              className="w-full rounded border border-line bg-white"
             />
-            {playable ? (
-              <span
-                className="absolute top-1/2 h-1.5 w-1.5 -translate-y-1/2 rounded-full bg-accent opacity-0 transition-opacity duration-150 group-hover:opacity-100"
-                style={{ left: `calc(${percent}% - 3px)` }}
-              />
-            ) : null}
           </div>
-          <span className="w-9 shrink-0 font-mono text-[10.5px] text-faint">
-            {playable ? formatTime(duration) : '--:--'}
-          </span>
-        </div>
+        ) : (
+          <div className="flex items-center gap-2.5 md:w-72 lg:w-96">
+            <span className="w-9 shrink-0 text-right font-mono text-[10.5px] text-faint">
+              {playable ? formatTime(time) : '--:--'}
+            </span>
+            <div
+              role="slider"
+              tabIndex={playable ? 0 : -1}
+              aria-label="播放进度"
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-valuenow={Math.round(percent)}
+              aria-disabled={playable ? undefined : true}
+              onClick={seek}
+              onKeyDown={(event) => {
+                const audio = audioRef.current;
+                if (!audio || !Number.isFinite(audio.duration) || audio.duration <= 0) return;
+                if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
+                event.preventDefault();
+                const delta = event.key === 'ArrowRight' ? 5 : -5;
+                audio.currentTime = Math.min(audio.duration, Math.max(0, audio.currentTime + delta));
+                setTime(audio.currentTime);
+              }}
+              className={[
+                'group relative h-4 flex-1 outline-none focus-visible:ring-1 focus-visible:ring-accent/60',
+                playable ? 'cursor-pointer' : 'cursor-default',
+              ].join(' ')}
+            >
+              <span className="absolute inset-x-0 top-1/2 h-[2px] -translate-y-1/2 rounded-full bg-line" />
+              <span
+                className="absolute top-1/2 h-[2px] -translate-y-1/2 rounded-full bg-accent/70 transition-[width] duration-150"
+                style={{ width: `${percent}%` }}
+              />
+              {playable ? (
+                <span
+                  className="absolute top-1/2 h-1.5 w-1.5 -translate-y-1/2 rounded-full bg-accent opacity-0 transition-opacity duration-150 group-hover:opacity-100"
+                  style={{ left: `calc(${percent}% - 3px)` }}
+                />
+              ) : null}
+            </div>
+            <span className="w-9 shrink-0 font-mono text-[10.5px] text-faint">
+              {playable ? formatTime(duration) : '--:--'}
+            </span>
+          </div>
+        )}
 
         <div className="flex shrink-0 items-center gap-1.5">
           <button
@@ -371,7 +395,20 @@ export function MusicShelf({
             <StepIcon dir="prev" />
           </button>
 
-          {playable ? (
+          {mode === 'embed' ? (
+            externalUrl ? (
+              <a
+                href={externalUrl}
+                target="_blank"
+                rel="noreferrer noopener"
+                aria-label={`在${platformLabel}收听`}
+                title={`在${platformLabel}收听`}
+                className="grid h-9 w-9 place-items-center rounded border border-line text-dim transition-colors duration-150 hover:border-line-strong hover:text-ink"
+              >
+                <ExternalIcon size={14} />
+              </a>
+            ) : null
+          ) : playable ? (
             <button
               type="button"
               onClick={toggle}
@@ -414,7 +451,11 @@ export function MusicShelf({
       </div>
 
       <p className="px-0.5 font-mono text-[10.5px] text-faint">
-        {playable ? ui.playerHint : ui.playerExternalHint.replace('{platform}', platformLabel)}
+        {mode === 'local'
+          ? ui.playerHint
+          : mode === 'embed'
+            ? ui.playerEmbedHint.replace('{platform}', platformLabel)
+            : ui.playerExternalHint.replace('{platform}', platformLabel)}
       </p>
 
       {active?.song.src ? (
