@@ -1,7 +1,0 @@
-feat: 曲目支持单曲级官方外链播放器（三模式收听）
-
-- Song 增加 neteaseId / inline：有 neteaseId 的跳转直接落单曲页，inline 为 true 才嵌官方播放器
-- MusicShelf 改为 local / embed / external 三模式自动判定，旧的 local 与 external 行为不变
-- 陈奕迅列改为指定 6 首；实测仅《阿猫阿狗》在匿名 iframe 中可播放，其余 5 首走单曲页
-- README 补充三模式说明与实测结论：VIP 曲目在外链播放器中连试听都不给
-- .gitignore 忽略 .edge-verify*
