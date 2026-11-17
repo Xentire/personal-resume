@@ -1,16 +1,7 @@
-# Cloudflare Pages 响应头配置（构建时会被复制到 dist/ 根目录）
-#
-# /assets/* 下的文件名带内容 hash（Vite 产物），内容一变文件名就变，
-# 所以可以放心 immutable 长缓存 —— 回头客不用再下载一遍 JS/CSS。
-# index.html 不在这里配置，保持 CF 默认的 max-age=0 + must-revalidate：
-# 每次访问都会校验，更新后立刻生效，不会出现「改了但访客还看旧版」。
-
-/assets/*
-  Cache-Control: public, max-age=31536000, immutable
-
-/resume.pdf
-  Cache-Control: public, max-age=3600
-
 /*
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
+
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+  X-Cache-Probe: assets
