@@ -17,6 +17,33 @@ npm run build    # 先 tsc 类型检查，再 vite build → dist/
 npm run preview  # 预览 dist/
 ```
 
+## 部署上线
+
+**推荐 Cloudflare Pages**（免费、免备案、连 Git 自动构建，不用手动提交 `dist`）：
+
+| 配置项 | 值 |
+| --- | --- |
+| Framework preset | Vite（或 None） |
+| Build command | `npm run build` |
+| Build output directory | `dist` |
+| Node 版本 | 由根目录 `.nvmrc`（`20`）指定，不用手填环境变量 |
+
+连上仓库（GitHub / GitLab）后每次 push 到 `main` 自动构建发布，得到 `https://<项目名>.pages.dev`。
+SPA 子路由刷新不需要额外配置（见「正文小节 → 部署注意」）。
+
+**关于国内访问**（2026-11 实测与文档口径，别被老教程带偏）：
+
+- 境内节点做网站**必须 ICP 备案**，这是政策要求，任何平台的「免费 + 国内直连 + 免备案」都不存在；
+- **Gitee Pages 已于 2024-05 下线**，官方称暂无恢复计划，网上教程都是过时洗稿；
+- **EdgeOne Pages 免费版默认域名不能对外分享**：大陆访问必须带控制台生成的预览 token，3 小时后 401；
+  要长期可访问就得绑自定义域名，绑域名走境内节点又要备案；
+- 想要国内秒开，正规路径是：买域名（约 ¥30-70/年）→ 用境内云资源接入备案（免费，2-4 周）→
+  在 EdgeOne / CloudBase 这类国内节点托管。备案本身不收费，贵的是域名和接入资源。
+
+`npm ci` 在云端能否跑通取决于 `package-lock.json` 与 `package.json` 严格同步——
+改依赖后务必本地 `npm install` 并提交更新后的 lockfile，否则构建会报
+`npm ci can only install packages when your package.json and package-lock.json are in sync`。
+
 ## 内容与代码如何解耦
 
 ```
@@ -141,15 +168,17 @@ tags: [Vite, 踩坑]
 2. `src/App.tsx` 的 `<Routes>` 里加 `<Route path="/posts" element={<Posts />} />`；
 3. 页面里记得 `document.title = ...`（参考 `pages/Home.tsx`、`pages/ProjectDetail.tsx`）。
 
-**部署注意**：用的是 `BrowserRouter` + History API，所以 Vercel 上必须有 SPA 回退，
-否则直接访问 `/projects/DataAgent` 会 404。仓库根目录的 `vercel.json` 已经配好：
+**部署注意**：用的是 `BrowserRouter` + History API，所以托管方必须支持 SPA 回退，
+否则直接访问 `/projects/DataAgent` 刷新会 404。三家平台的差异：
 
-```json
-{ "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }] }
-```
+| 平台 | 需要做什么 |
+| --- | --- |
+| **Cloudflare Pages** | **零配置**——项目里没有 `404.html` 时，Pages 自动把所有未匹配路径回退到 `index.html` |
+| Vercel | 仓库根目录 `vercel.json` 已配好 |
+| Netlify | 需要 `public/_redirects` 写 `/* /index.html 200` |
+| Gitee Pages | **已于 2024-05 下线，不要用**（只能靠 hash 路由兜，但服务本身没了） |
 
-Vercel 的 `rewrites` 会先匹配真实文件，所以 `/resume.pdf`、`/assets/*` 不会被带走。
-换成 Netlify（`_redirects`）或 GitHub Pages（需要 404.html hack）时别忘了对应配置。
+Vercel 的 `rewrites` / CF 的 SPA 回退都会先匹配真实文件，所以 `/resume.pdf`、`/assets/*` 不会被带走。
 
 **站内链接不要写裸 `<a href="/#projects">`**：跨页面跳到首页区块时用 `components/ui/SectionLink.tsx`，
 它走路由并交给 `ScrollManager` 滚动，否则整页会刷新一次。
