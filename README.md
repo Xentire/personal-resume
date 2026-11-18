@@ -17,6 +17,13 @@ npm run build    # 先 tsc 类型检查，再 vite build → dist/
 npm run preview  # 预览 dist/
 ```
 
+改完简历 PDF 后：
+
+```bash
+npm run resume:sync     # 重新解析 PDF → content/resume.json
+npm run resume:report   # 看看这次解析到底变了什么（含 ext 名字失配检查）
+```
+
 ## 部署上线
 
 **推荐 Cloudflare Pages**（免费、免备案、连 Git 自动构建，不用手动提交 `dist`）：
@@ -258,12 +265,40 @@ Vercel 的 `rewrites` / CF 的 SPA 回退都会先匹配真实文件，所以 `/
 2. 建 `src/components/sections/Xxx.tsx`，用 `<Section id="xxx" index={sections.xxx.index} …>` 套壳
 3. `src/pages/Home.tsx` 里挂上组件（区块都拼在首页；`App.tsx` 只放路由表）
 
-### 更新简历
+### 更新简历（不用找人改代码）
 
-1. 直接替换根目录 PDF（同名或换成新的 `*.pdf`），执行 `npm run resume:sync`；
-2. 同步脚本还会把 PDF 复制到 `public/resume.pdf`，供页面「下载简历」按钮使用。
+改完简历只需三步，**文案类修改完全自助**，不需要动任何 `.tsx`：
 
-> PDF 重新解析后名称有变化时，ext 里按名字绑定的那段会失效（控制台有 warn），改 ext 的 key 即可。
+```bash
+# 1. 用新 PDF 覆盖根目录同名文件（文件名可以变，脚本会自动找 *.pdf）
+# 2. 重新解析：会重写 content/resume.json，并把 PDF 复制到 public/resume.pdf
+npm run resume:sync
+# 3. 自检：逐条列出「相对上次提交」解析结果变了什么，并检查 ext 名字是否对不上
+npm run resume:report
+```
+
+`npm run resume:report` 会打印三类信息：
+
+- **变化明细**：按实习 / 项目 / 荣誉分组，逐条给出 `+ 新增` / `- 删除` / `~ 修改`（长文本按行对比，只显示真正变了的那几条）；
+- **ext 失配告警**：`resume.ext.json` 是按**名字**挂载的，简历里改了项目/实习名称，那一段增强字段会静默失效，
+  报告会直接点出哪个 key 找不到同名条目；
+- **PDF 忘记同步**：PDF 的修改时间晚于 `resume.json` 的 `syncedAt` 就提醒你。
+
+确认没问题再提交：
+
+```bash
+git add content/resume.json public/resume.pdf && git commit -m "chore(resume): 同步简历"
+```
+
+**什么时候还是得改代码**：
+
+| 情况 | 要改什么 |
+| --- | --- |
+| 只改了履历文案、时间、技术栈、要点 | 不用，跑上面三步即可 |
+| 新增了实习 / 项目，且想在首页露出 | 一般自动出现；想补指标、架构图、要点覆盖再改 `resume.ext.json` |
+| 简历里改了项目/实习**名称** | 报告会告警，改 `resume.ext.json` 里对应的 key，以及 `content/projects/<旧名>.md` 的文件名 |
+| 新增了板块 / 新页面 | 要写组件（见上文「加一个板块」） |
+| PDF 换版式（多栏、表格化）导致解析错位 | 找我，解析规则在 `scripts/sync-resume.mjs` |
 
 ### 调试解析
 

@@ -6,6 +6,7 @@
   "description": "Backend engineer portfolio - content driven by resume PDF",
   "scripts": {
     "resume:sync": "node scripts/sync-resume.mjs",
+    "resume:report": "node scripts/resume-report.mjs",
     "predev": "node scripts/sync-resume.mjs --tolerant",
     "dev": "vite",
     "prebuild": "node scripts/sync-resume.mjs --tolerant",
