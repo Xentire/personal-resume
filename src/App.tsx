@@ -4,7 +4,9 @@ import { Footer } from './components/layout/Footer';
 import { Navbar } from './components/layout/Navbar';
 import { ScrollManager } from './components/layout/ScrollManager';
 import { profile } from './data/resume';
+import { Blog } from './pages/Blog';
 import { Home } from './pages/Home';
+import { PostDetail } from './pages/PostDetail';
 import { ProjectDetail } from './pages/ProjectDetail';
 
 function NotFound() {
@@ -37,6 +39,8 @@ export default function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/projects/:slug" element={<ProjectDetail />} />
+            <Route path="/blog" element={<Blog />} />
+            <Route path="/blog/:slug" element={<PostDetail />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </main>

@@ -32,9 +32,6 @@ yarn.lock
 # 本地截图产物
 preview
 
-# headless 浏览器临时 profile
-.edge-profile
-.edge-profile-*
-.edge-verify
-.edge-verify-*
+# headless 浏览器临时 profile 与一次性验证脚本
+.edge-*
 vite.config.ts.timestamp-*.mjs

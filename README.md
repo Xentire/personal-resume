@@ -165,6 +165,8 @@ CSS，放进 `#0B0E14` 深色界面就是一块白板，六套深色主题下全
 | --- | --- | --- |
 | `/` | 首页，一屏到底的所有区块 | `resume.json` + `resume.ext.json` |
 | `/projects/:slug` | 单个项目详情页 | 同上，`slug` 就是项目名（会自动 URL 编码） |
+| `/blog` | 文章列表（标题 / 摘要 / 日期 / 标签 / 预估阅读时长） | `content/posts/*.md` |
+| `/blog/:slug` | 文章详情（正文 + 上下篇） | 同上，`slug` 就是 md 文件名 |
 | `*` | 404 | — |
 
 首页每张项目卡底部有「查看详情 →」，跳转 `/projects/DataAgent` 这种地址。详情页会渲染
@@ -179,11 +181,29 @@ CSS，放进 `#0B0E14` 深色界面就是一块白板，六套深色主题下全
 `content/projects/_template.md` 是可复制的模板，`_` 开头的文件不会被加载。
 没有 md 文件时详情页只渲染结构化字段，不会报错也没有空状态提示。
 
-**加一个全新的页面类型**（比如博客列表 `/posts`）：
+**加一个全新的页面类型**（比如 `/photos`）：
 
-1. `src/pages/Posts.tsx` 建组件；
-2. `src/App.tsx` 的 `<Routes>` 里加 `<Route path="/posts" element={<Posts />} />`；
-3. 页面里记得 `document.title = ...`（参考 `pages/Home.tsx`、`pages/ProjectDetail.tsx`）。
+1. `src/pages/Photos.tsx` 建组件；
+2. `src/App.tsx` 的 `<Routes>` 里加 `<Route path="/photos" element={<Photos />} />`；
+3. 页面里记得 `document.title = ...`（参考 `pages/Home.tsx`、`pages/ProjectDetail.tsx`）；
+4. 想让它出现在顶部导航：在 `src/data/site.ts` 的 `routeNavDefs` 里加 `{ to: '/photos', label: '照片' }`
+   （**不要**加进 `sectionDefs`，那是首页区块，会占用 01/02 序号）。
+
+### 博客（/blog）
+
+写文章只碰 `content/posts/`，不写代码：
+
+1. 复制 `content/posts/_template.md`，改名成 `whatever.md`——**文件名就是 URL**，即 `/blog/whatever`；
+2. 顶部 front-matter 填 `title` / `date` / `summary` / `tags`，下面是正文 markdown；
+3. 保存即生效（dev 下热更新，线上构建时读入）。
+
+几个约定：
+
+- front-matter 里 `date` 用 `2026-11-18` 这种格式，列表按它倒序排；`summary` 会出现在列表卡片上，不写也能跑。
+- 阅读时长按正文 400 字/分钟粗算，去掉代码块后统计，最少显示 1 min。
+- `_` 开头的文件（如 `_template.md`、草稿）会被忽略，不会出现在列表里。
+- **一篇文章都没有时**：`/blog` 显示空状态提示，「个人分享」板块和导航项「博客」都会自动隐藏——
+  所以可以先建页面后补内容，不会给访客一个空列表。
 
 **部署注意**：用的是 `BrowserRouter` + History API，所以托管方必须支持 SPA 回退，
 否则直接访问 `/projects/DataAgent` 刷新会 404。三家平台的差异：
@@ -237,7 +257,7 @@ node scripts/sync-resume.mjs --dump   # 输出 PDF 逐行文本到 resume-lines.
 ├── vercel.json                 # SPA 回退（/projects/xxx 直接访问不 404）
 ├── src/
 │   ├── App.tsx                 # 路由表：/ 首页、/projects/:slug 详情、* 404
-│   ├── pages/                  # Home（首页区块拼装）/ ProjectDetail
+│   ├── pages/                  # Home（首页区块拼装）/ ProjectDetail / Blog / PostDetail
 │   ├── data/resume.ts          # 类型定义 + 两层合并 + 派生字段
 │   ├── data/site.ts            # 板块注册表 + UI 文案（序号自动生成）
 │   ├── data/posts.ts           # 构建期读入 markdown 文章

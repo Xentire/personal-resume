@@ -57,6 +57,23 @@ export const navItems: NavItem[] = visibleDefs
 
 export const navIds: string[] = navItems.map((item) => item.id);
 
+/**
+ * 独立页面的导航项（不是首页区块，所以不进 sectionDefs，也不占 01/02 序号）。
+ * 需要的话在这里加一项，Navbar 会自动渲染成路由链接。
+ */
+export interface RouteNavItem {
+  to: string;
+  label: string;
+  /** 依赖 content/posts 有内容才显示，没有文章时导航里看不到「博客」 */
+  requiresPosts?: boolean;
+}
+
+const routeNavDefs: RouteNavItem[] = [{ to: '/blog', label: '博客', requiresPosts: true }];
+
+export const routeNavItems: RouteNavItem[] = routeNavDefs.filter(
+  (item) => !item.requiresPosts || hasPosts
+);
+
 export const ui = {
   available: '求职中',
   heroPrimary: '查看项目',
@@ -85,6 +102,17 @@ export const ui = {
   diagramError: '架构图渲染失败，已回退为源码',
   postExpand: '展开全文',
   postCollapse: '收起',
+  /** /blog 列表页与 /blog/:slug 详情页 */
+  blogHeading: '个人分享',
+  blogDesc: '技术笔记、踩坑记录与阶段性思考。',
+  blogRead: '阅读',
+  blogBack: '返回文章列表',
+  blogPrev: '更新的',
+  blogNext: '更早的',
+  blogEmptyTitle: '还没有文章',
+  blogEmptyBody: '往 content/posts/ 里放一个 .md 文件，构建时会自动出现在这里；文件名即链接。',
+  blogMissingTitle: '没有找到这篇文章',
+  blogMissingBody: '链接可能过期了，或者文件名改过。回到列表看看当前有哪些文章。',
   themeLabel: '换配色',
   themeHint: '仅保存在本机',
 } as const;

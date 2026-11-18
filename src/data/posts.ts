@@ -15,6 +15,8 @@ export interface Post {
   summary: string | null;
   tags: string[];
   body: string;
+  /** 预估阅读时长（分钟），按中文 400 字/分钟粗算，够列表上给个量级 */
+  minutes: number;
 }
 
 const modules = import.meta.glob(['../../content/posts/*.md', '!../../content/posts/_*.md'], {
@@ -24,6 +26,12 @@ const modules = import.meta.glob(['../../content/posts/*.md', '!../../content/po
 }) as Record<string, string>;
 
 const strip = (value: string) => value.replace(/^["']|["']$/g, '').trim();
+
+/** 去掉代码块与空白后按 400 字/分钟估算，最少 1 分钟 */
+function readingMinutes(body: string): number {
+  const plain = body.replace(/```[\s\S]*?```/g, ' ').replace(/\s+/g, '');
+  return Math.max(1, Math.round(plain.length / 400));
+}
 
 function parseTags(value: string | undefined): string[] {
   if (!value) return [];
@@ -59,6 +67,7 @@ function parsePost(filePath: string, raw: string): Post | null {
     summary: strip(meta.summary ?? '') || null,
     tags: parseTags(meta.tags),
     body: body.trim(),
+    minutes: readingMinutes(body),
   };
 }
 
@@ -68,3 +77,15 @@ export const posts: Post[] = Object.entries(modules)
   .sort((a, b) => (b.date ?? '').localeCompare(a.date ?? ''));
 
 export const hasPosts = posts.length > 0;
+
+export const postBySlug = (slug: string): Post | undefined => posts.find((post) => post.slug === slug);
+
+/**
+ * 相邻文章。posts 已按日期倒序，所以 prev 是更新的一篇、next 是更早的一篇。
+ * 列表只有一两篇时任意一侧会是 null，页面按需隐藏。
+ */
+export function postNeighbors(slug: string): { prev: Post | null; next: Post | null } {
+  const index = posts.findIndex((post) => post.slug === slug);
+  if (index < 0) return { prev: null, next: null };
+  return { prev: posts[index - 1] ?? null, next: posts[index + 1] ?? null };
+}

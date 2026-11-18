@@ -161,15 +161,19 @@ export function ProjectDetail() {
   return (
     <article className="container-page pb-16 pt-24 md:pt-28">
       <nav className="flex items-center gap-2 font-mono text-[11px] text-faint">
-        <Link to="/" className="transition-colors duration-150 hover:text-ink">
+        <Link to="/" className="shrink-0 transition-colors duration-150 hover:text-ink">
           首页
         </Link>
-        <span aria-hidden>/</span>
-        <Link to="/#projects" className="transition-colors duration-150 hover:text-ink">
+        <span aria-hidden className="shrink-0">
+          /
+        </span>
+        <Link to="/#projects" className="shrink-0 transition-colors duration-150 hover:text-ink">
           {sections.projects.title}
         </Link>
-        <span aria-hidden>/</span>
-        <span className="truncate text-dim">{project.name}</span>
+        <span aria-hidden className="shrink-0">
+          /
+        </span>
+        <span className="min-w-0 truncate text-dim">{project.name}</span>
       </nav>
 
       <header className="mt-6 border-b border-line pb-7">
