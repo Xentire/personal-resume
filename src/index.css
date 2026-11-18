@@ -226,6 +226,33 @@ body {
     @apply block border-0 bg-transparent p-0 text-[12px] leading-6 text-dim;
   }
 
+  /* 表格：移动端横向滚动，不挤压正文列宽 */
+  .md-table {
+    @apply -mx-1 overflow-x-auto;
+  }
+
+  .md-body table {
+    @apply w-full min-w-[560px] border-collapse text-[12.5px];
+  }
+
+  .md-body th,
+  .md-body td {
+    @apply border border-line px-3 py-2 text-left align-top leading-[1.7];
+  }
+
+  .md-body th {
+    @apply whitespace-nowrap bg-elevated font-medium text-ink;
+  }
+
+  .md-body td {
+    @apply text-dim;
+  }
+
+  /* 第一列是「决策点」这类短标签，折成两三字一行反而难读 */
+  .md-body td:first-child {
+    @apply whitespace-nowrap text-ink;
+  }
+
   .md-body .md-lang {
     @apply absolute right-3 top-2 font-mono text-[11px] uppercase tracking-[0.16em] text-faint;
   }

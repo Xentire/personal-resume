@@ -76,6 +76,9 @@ export const ui = {
   ],
   projectDetail: '查看详情',
   projectDetailNotes: '项目详述',
+  /** 项目详情页左侧模块锚点导航的小标题 */
+  projectToc: '本页导航',
+  projectNoContent: '这个项目还没有填写内容。',
   diagramTitle: '架构图',  diagramHint: '可左右滑动查看完整架构图',
   diagramLoading: '渲染中…',
   diagramError: '架构图渲染失败，已回退为源码',
@@ -95,6 +98,12 @@ export const labels = {
   engineering: '工程实践',
   metrics: '量化成果',
   projectMetrics: '关键指标',
+  /** 项目详情页的固定模块标题（markdown 里的 h2 用同样的文字即可覆盖该模块） */
+  projectIntro: '项目简介',
+  projectArchitecture: '架构图',
+  projectImplementation: '核心实现',
+  projectStackAndRepo: '技术栈与仓库',
+  projectRepo: '公开仓库',
   academic: '学业表现',
   email: '邮箱',
   phone: '电话',

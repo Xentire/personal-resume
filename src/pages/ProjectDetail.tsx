@@ -1,17 +1,54 @@
 import { useEffect } from 'react';
+import type { ReactNode } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { profile, projects } from '../data/resume';
 import { projectDoc } from '../data/projectDocs';
 import { labels, sections, ui } from '../data/site';
-import { renderMarkdown } from '../lib/markdown';
+import { renderMarkdown, splitSections } from '../lib/markdown';
 import { ArchitectureDiagram } from '../components/ui/ArchitectureDiagram';
 import { BulletList, MetricStrip, StackList, SubHeading } from '../components/ui/Primitives';
 
 /**
  * 项目详情页（独立路由 /projects/:slug）。
- * 内容来源：resume.json 里的结构化字段 + 可选的 content/projects/<项目名>.md 长文。
- * 加一个新项目的详情页不用改代码，见 README。
+ *
+ * 固定模块顺序：项目简介 → 架构图 → 核心实现 → 架构取舍对比 → 踩坑复盘 →
+ * 现存局限与优化方向 → 技术栈与仓库。
+ *
+ * 内容来源分两处，组件里不写任何业务文案：
+ *   1. resume.json / resume.ext.json 的结构化字段：summary、features、metrics、
+ *      architecture(mermaid)、stackGroups、links；
+ *   2. content/projects/<项目名>.md 的长文，按 h2 切分成模块：
+ *      标题与结构化模块重名 → 覆盖该模块；新标题 → 按文件顺序追加在后面。
+ * 所以「架构取舍对比 / 踩坑复盘 / 现存局限」这三块纯文字模块只写在 md 里，
+ * 没写就自动不渲染，不会留空标题。
  */
+
+interface ModuleSpec {
+  id: string;
+  title: string;
+  content: ReactNode;
+}
+
+/** 标题 → 锚点 id：中文标题只需要去掉空白与标点，够用且稳定 */
+const anchorOf = (title: string): string =>
+  title
+    .trim()
+    .toLowerCase()
+    .replace(/[\s/\\·、，,。.：:；;（）()【】[\]]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+
+function Module({ id, index, title, children }: { id: string; index: string; title: string; children: ReactNode }) {
+  return (
+    <section id={id} className="scroll-mt-24">
+      <h2 className="flex items-baseline gap-2.5 border-b border-line pb-2">
+        <span className="font-mono text-[11px] text-faint">{index}</span>
+        <span className="text-[15px] font-medium tracking-tight text-ink md:text-[16px]">{title}</span>
+      </h2>
+      <div className="mt-4">{children}</div>
+    </section>
+  );
+}
+
 export function ProjectDetail() {
   const { slug } = useParams();
   const project = projects.find((item) => item.name === decodeURIComponent(slug ?? ''));
@@ -39,6 +76,87 @@ export function ProjectDetail() {
 
   const doc = projectDoc(project.name);
   const index = projects.findIndex((item) => item.name === project.name);
+
+  /* ---------- 结构化模块（数据来自 JSON） ---------- */
+  const structured: ModuleSpec[] = [];
+
+  if (project.summary) {
+    structured.push({
+      id: 'intro',
+      title: labels.projectIntro,
+      content: <p className="text-[13.5px] leading-[1.9] text-dim">{project.summary}</p>,
+    });
+  }
+
+  if (project.architecture) {
+    structured.push({
+      id: 'architecture',
+      title: labels.projectArchitecture,
+      content: (
+        <ArchitectureDiagram code={project.architecture.mermaid} caption={project.architecture.caption} />
+      ),
+    });
+  }
+
+  if (project.features.length) {
+    structured.push({
+      id: 'implementation',
+      title: labels.projectImplementation,
+      content: <BulletList items={project.features} />,
+    });
+  }
+
+  /* ---------- markdown 模块（标题重名则覆盖，其余按文件顺序追加） ---------- */
+  const docSections = doc ? splitSections(doc).filter((section) => section.heading) : [];
+
+  for (const section of docSections) {
+    const node = section.body ? (
+      <div className="md-body" dangerouslySetInnerHTML={{ __html: renderMarkdown(section.body) }} />
+    ) : null;
+
+    const hit = structured.findIndex((item) => item.title === section.heading);
+    if (hit >= 0) {
+      structured[hit] = { ...structured[hit], content: node };
+      continue;
+    }
+    structured.push({ id: anchorOf(section.heading), title: section.heading, content: node });
+  }
+
+  /* ---------- 末尾固定：技术栈 + 公开仓库 ---------- */
+  if (project.stackGroups.length || project.links.length) {
+    structured.push({
+      id: 'stack',
+      title: labels.projectStackAndRepo,
+      content: (
+        <div className="space-y-5">
+          {project.stackGroups.length ? <StackList groups={project.stackGroups} /> : null}
+          {project.links.length ? (
+            <div>
+              <SubHeading>{labels.projectRepo}</SubHeading>
+              <div className="flex flex-wrap gap-2">
+                {project.links.map((link) => (
+                  <a
+                    key={link.href}
+                    href={link.href}
+                    target="_blank"
+                    rel="noreferrer noopener"
+                    className="inline-flex items-center gap-1.5 rounded-card border border-line bg-surface px-3 py-1.5 font-mono text-[11.5px] text-ink transition-colors duration-150 hover:border-line-strong hover:bg-elevated"
+                  >
+                    {link.label}
+                    <span aria-hidden className="text-faint">
+                      ↗
+                    </span>
+                  </a>
+                ))}
+              </div>
+            </div>
+          ) : null}
+        </div>
+      ),
+    });
+  }
+
+  const modules = structured.filter((item) => item.content !== null);
 
   return (
     <article className="container-page pb-16 pt-24 md:pt-28">
@@ -78,65 +196,42 @@ export function ProjectDetail() {
             </>
           ) : null}
         </p>
-
-        {project.links.length ? (
-          <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2">
-            {project.links.map((link) => (
-              <a
-                key={link.href}
-                href={link.href}
-                target="_blank"
-                rel="noreferrer noopener"
-                className="font-mono text-[11.5px] text-accent transition-colors duration-150 hover:text-ink"
-              >
-                {link.label} ↗
-              </a>
-            ))}
-          </div>
-        ) : null}
       </header>
 
-      <div className="mt-7 space-y-7">
-        <MetricStrip metrics={project.metrics} title={labels.projectMetrics} />
+      <div className="mt-7 grid gap-8 xl:grid-cols-12 xl:gap-10">
+        {/* min-w-0 必须有：架构图 svg 与表格都是固定/最小宽度，grid 项默认 min-width:auto
+            会被内容顶宽，窄屏下整页横向溢出。加了它，溢出改由各自的 overflow-x-auto 承接。 */}
+        <div className="min-w-0 space-y-8 xl:col-span-8">
+          <MetricStrip metrics={project.metrics} title={labels.projectMetrics} />
 
-        {project.architecture ? (
-          <ArchitectureDiagram code={project.architecture.mermaid} caption={project.architecture.caption} />
-        ) : null}
+          {modules.map((item, position) => (
+            <Module key={item.id} id={item.id} index={String(position + 1).padStart(2, '0')} title={item.title}>
+              {item.content}
+            </Module>
+          ))}
 
-        <div className="grid gap-8 xl:grid-cols-12 xl:gap-10">
-          <div className="space-y-6 xl:col-span-8">
-            {project.summary ? (
-              <section>
-                <SubHeading>{labels.summary}</SubHeading>
-                <p className="text-[13.5px] leading-[1.9] text-dim">{project.summary}</p>
-              </section>
-            ) : null}
-
-            {project.features.length ? (
-              <section>
-                <SubHeading>{labels.features}</SubHeading>
-                <BulletList items={project.features} />
-              </section>
-            ) : null}
-
-            {doc ? (
-              <section>
-                <SubHeading>{ui.projectDetailNotes}</SubHeading>
-                <div
-                  className="md-body"
-                  dangerouslySetInnerHTML={{ __html: renderMarkdown(doc) }}
-                />
-              </section>
-            ) : null}
-          </div>
-
-          {project.stackGroups.length ? (
-            <aside className="order-first xl:order-none xl:col-span-4 xl:border-l xl:border-line xl:pl-8">
-              <SubHeading>{labels.stack}</SubHeading>
-              <StackList groups={project.stackGroups} />
-            </aside>
-          ) : null}
+          {!modules.length ? <p className="text-[13px] leading-6 text-faint">{ui.projectNoContent}</p> : null}
         </div>
+
+        {modules.length > 2 ? (
+          <aside className="hidden min-w-0 xl:col-span-4 xl:block">
+            <div className="sticky top-24">
+              <SubHeading>{ui.projectToc}</SubHeading>
+              <nav className="flex flex-col border-l border-line">
+                {modules.map((item, position) => (
+                  <a
+                    key={item.id}
+                    href={`#${item.id}`}
+                    className="-ml-px flex items-baseline gap-2 border-l border-transparent py-1.5 pl-3 font-mono text-[11.5px] text-dim transition-colors duration-150 hover:border-accent hover:text-ink"
+                  >
+                    <span className="text-faint">{String(position + 1).padStart(2, '0')}</span>
+                    <span>{item.title}</span>
+                  </a>
+                ))}
+              </nav>
+            </div>
+          </aside>
+        ) : null}
       </div>
 
       <div className="mt-12 flex flex-wrap items-center justify-between gap-3 border-t border-line pt-6">
