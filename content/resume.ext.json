@@ -47,22 +47,6 @@
       }
     ]
   },
-  "interests": {
-    "_comment": "只存歌单元数据与平台链接，站内不托管、不播放任何音频；neteaseId / qqMid 留空时自动降级成该平台的搜索页，不会 404。加歌只改这里，组件不用动。",
-    "artists": [
-      {
-        "name": "陈奕迅",
-        "songs": [
-          { "title": "任我行", "album": null, "neteaseId": "27483202", "qqMid": null },
-          { "title": "落花流水", "album": null, "neteaseId": "64922", "qqMid": null },
-          { "title": "沙龙", "album": null, "neteaseId": "64833", "qqMid": null },
-          { "title": "Shall We Talk", "album": null, "neteaseId": "67411", "qqMid": null },
-          { "title": "葡萄成熟时", "album": null, "neteaseId": "66285", "qqMid": null },
-          { "title": "阿猫阿狗", "album": null, "neteaseId": "27483200", "qqMid": null }
-        ]
-      }
-    ]
-  },
   "skills": [
     {
       "group": "后端与框架",

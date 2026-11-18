@@ -1,13 +1,5 @@
-import {
-  aboutHighlights,
-  education,
-  learning,
-  musicArtists,
-  musicTrackCount,
-  philosophy,
-  profile,
-} from '../../data/resume';
-import { labels, sections, ui } from '../../data/site';
+import { aboutHighlights, education, learning, philosophy, profile } from '../../data/resume';
+import { labels, sections } from '../../data/site';
 import { Section } from '../layout/Section';
 
 export function About() {
@@ -119,76 +111,6 @@ export function About() {
           </ul>
         </div>
       </div>
-
-      {/* 兴趣爱好：只做歌单索引 + 官方平台外链，不加载任何音频 */}
-      {musicArtists.length ? (
-        <div className="mt-10 border-t border-line pt-9">
-          <div className="flex flex-wrap items-baseline justify-between gap-2">
-            <h3 className="label-mono">{labels.interests}</h3>
-            <span className="font-mono text-[10.5px] text-faint">
-              {musicTrackCount} {ui.trackUnit} · {ui.platformNetease} / {ui.platformQq}
-            </span>
-          </div>
-          <p className="mt-2 text-[11.5px] leading-5 text-faint">{ui.musicHint}</p>
-
-          <div className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-            {musicArtists.map((artist) => (
-              <div key={artist.name} className="card p-4">
-                <div className="flex items-baseline justify-between gap-3 border-b border-line pb-2">
-                  <span className="text-[13px] text-ink">{artist.name}</span>
-                  <span className="font-mono text-[10.5px] text-faint">
-                    {String(artist.songs.length).padStart(2, '0')}
-                  </span>
-                </div>
-
-                <ul className="mt-2 space-y-px">
-                  {artist.songs.map((song, index) => {
-                    // 第一个平台是主入口：曲目名本身就是链接，尾随 ↗ 提示"点了会离开本站"；
-                    // 其余平台作为右侧小标签并列。
-                    const [primary, ...otherPlatforms] = song.links;
-                    return (
-                      <li
-                        key={song.title}
-                        className="group flex items-center gap-2 rounded px-1.5 py-1.5 transition-colors duration-150 hover:bg-elevated"
-                      >
-                        <span className="shrink-0 font-mono text-[10.5px] text-faint">
-                          {String(index + 1).padStart(2, '0')}
-                        </span>
-                        <a
-                          href={primary.href}
-                          target="_blank"
-                          rel="noreferrer noopener"
-                          title={`在${primary.label}打开：${artist.name}《${song.title}》`}
-                          className="flex min-w-0 flex-1 items-baseline gap-1 text-[12.5px] text-dim transition-colors duration-150 group-hover:text-ink hover:text-ink"
-                        >
-                          <span className="truncate underline-offset-2 group-hover:underline">{song.title}</span>
-                          <span aria-hidden className="shrink-0 text-[10px] text-faint">
-                            ↗
-                          </span>
-                        </a>
-                        <span className="flex shrink-0 items-center gap-2">
-                          {otherPlatforms.map((link) => (
-                            <a
-                              key={link.label}
-                              href={link.href}
-                              target="_blank"
-                              rel="noreferrer noopener"
-                              title={`在${link.label}打开：${artist.name}《${song.title}》`}
-                              className="font-mono text-[10.5px] text-faint transition-colors duration-150 hover:text-accent"
-                            >
-                              {link.label === ui.platformQq ? ui.platformQqShort : link.label}
-                            </a>
-                          ))}
-                        </span>
-                      </li>
-                    );
-                  })}
-                </ul>
-              </div>
-            ))}
-          </div>
-        </div>
-      ) : null}
     </Section>
   );
 }

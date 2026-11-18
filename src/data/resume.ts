@@ -9,7 +9,6 @@
  */
 import raw from '../../content/resume.json';
 import extRaw from '../../content/resume.ext.json';
-import { ui } from './site';
 
 /* ------------------------------------------------------------------ */
 /* 类型                                                               */
@@ -439,7 +438,7 @@ export const aboutHighlights: Highlight[] = Array.isArray(aboutRaw.highlights)
   : [];
 
 /* ------------------------------------------------------------------ */
-/* 扩展层：开发理念 / 学习计划 / 歌单                                 */
+/* 扩展层：开发理念 / 学习计划                                        */
 /* ------------------------------------------------------------------ */
 
 export interface Principle {
@@ -451,23 +450,6 @@ export interface LearningItem {
   topic: string;
   note: string;
   status: string | null;
-}
-
-export interface SongLink {
-  label: string;
-  href: string;
-}
-
-export interface Song {
-  title: string;
-  album: string | null;
-  /** 顺序有意义：第一个是主入口（点击曲目名走这里），其余作为右侧小标签 */
-  links: SongLink[];
-}
-
-export interface Artist {
-  name: string;
-  songs: Song[];
 }
 
 const namedList = <T,>(value: unknown, pick: (row: Record<string, unknown>) => T | null): T[] =>
@@ -486,52 +468,6 @@ export const learning: LearningItem[] = namedList(aboutRaw.learning, (row) => {
   if (!topic) return null;
   return { topic, note: text(row.note) ?? '', status: text(row.status) };
 });
-
-/**
- * 歌单：只存元数据与平台链接，站内不托管、不播放任何音频。
- * 有平台内部 ID 就直连歌曲页，没有就退化成该平台的搜索结果页——不猜 ID、不会 404。
- */
-const PLATFORM = {
-  neteaseSong: (id: string) => `https://music.163.com/#/song?id=${id}`,
-  neteaseSearch: (keyword: string) => `https://music.163.com/#/search/m/?s=${encodeURIComponent(keyword)}&type=1`,
-  qqSong: (mid: string) => `https://y.qq.com/n/ryqq/songDetail/${mid}`,
-  qqSearch: (keyword: string) => `https://y.qq.com/n/ryqq/search?w=${encodeURIComponent(keyword)}`,
-} as const;
-
-const songLinks = (artist: string, row: Record<string, unknown>): SongLink[] => {
-  const title = text(row.title);
-  if (!title) return [];
-  const keyword = `${artist} ${title}`;
-  const neteaseId = text(row.neteaseId);
-  const qqMid = text(row.qqMid);
-
-  return [
-    { label: ui.platformNetease, href: neteaseId ? PLATFORM.neteaseSong(neteaseId) : PLATFORM.neteaseSearch(keyword) },
-    { label: ui.platformQq, href: qqMid ? PLATFORM.qqSong(qqMid) : PLATFORM.qqSearch(keyword) },
-  ];
-};
-
-export const musicArtists: Artist[] = namedList(
-  /*
-   * 歌单来源：resume.json 里写了 interests 就用它，否则读 resume.ext.json。
-   * 但 resume.json 每次 sync 会被脚本整份重写，长期数据要放 ext；这里两种都能读，避免手写完丢失。
-   */
-  Array.isArray(record(record(raw).interests).artists)
-    ? record(record(raw).interests).artists
-    : record(ext.interests).artists,
-  (row) => {
-    const name = text(row.name);
-    if (!name) return null;
-    const songs: Song[] = namedList(row.songs, (song) => {
-      const title = text(song.title);
-      if (!title) return null;
-      return { title, album: text(song.album), links: songLinks(name, song) };
-    });
-    return songs.length ? { name, songs } : null;
-  }
-);
-
-export const musicTrackCount = musicArtists.reduce((sum, artist) => sum + artist.songs.length, 0);
 
 /* ------------------------------------------------------------------ */
 /* 派生                                                               */
