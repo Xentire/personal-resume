@@ -170,6 +170,8 @@ const root = record(raw);
 const ext = record(extRaw);
 const profileRaw = record(root.profile);
 const contactsRaw = record(profileRaw.contacts);
+/** 社交账号：PDF 里通常没有，允许 ext.contacts 覆盖 / 补齐（ext 优先） */
+const extContacts = record(ext.contacts);
 
 export const profile: Profile = {
   name: text(profileRaw.name) ?? '未命名',
@@ -182,10 +184,10 @@ export const profile: Profile = {
   location: text(profileRaw.location),
   summary: text(profileRaw.summary),
   contacts: {
-    email: text(contactsRaw.email) ?? text(profileRaw.email),
-    phone: text(contactsRaw.phone) ?? text(profileRaw.phone),
-    github: text(contactsRaw.github),
-    wechat: text(contactsRaw.wechat),
+    email: text(extContacts.email) ?? text(contactsRaw.email) ?? text(profileRaw.email),
+    phone: text(extContacts.phone) ?? text(contactsRaw.phone) ?? text(profileRaw.phone),
+    github: text(extContacts.github) ?? text(contactsRaw.github),
+    wechat: text(extContacts.wechat) ?? text(contactsRaw.wechat),
   },
 };
 

@@ -163,6 +163,10 @@
     }
   },
   "demos": [],
+  "contacts": {
+    "_comment": "PDF 里没有的社交账号写这里（ext 优先于解析结果）。github 会出现在首页 Hero 按钮、页脚联系区和 About 里；wechat 只展示不链接。",
+    "github": "https://github.com/Xentire"
+  },
   "awards": [
     {
       "title": "蓝桥杯",

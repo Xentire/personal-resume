@@ -1,5 +1,6 @@
 ﻿import { heroKeywords, heroStats, meta, profile, projects, resumeDownloadName, skillGroups } from '../../data/resume';
-import { ui } from '../../data/site';
+import { labels, ui } from '../../data/site';
+import { externalUrl } from '../../lib/url';
 import { SectionLink } from '../ui/SectionLink';
 
 function ArrowIcon() {
@@ -15,6 +16,14 @@ function DownloadIcon() {
     <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden>
       <path d="M8 2v8m0 0 3-3m-3 3L5 7" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
       <path d="M3 12.5h10" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function GithubIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+      <path d="M12 .3a12 12 0 0 0-3.8 23.4c.6.1.8-.3.8-.6v-2.2c-3.3.7-4-1.6-4-1.6-.6-1.4-1.4-1.8-1.4-1.8-1.1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1.1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.8-1.6-2.7-.3-5.5-1.3-5.5-5.9 0-1.3.5-2.4 1.2-3.2-.1-.3-.5-1.5.1-3.2 0 0 1-.3 3.3 1.2a11.5 11.5 0 0 1 6 0c2.3-1.5 3.3-1.2 3.3-1.2.6 1.7.2 2.9.1 3.2.8.8 1.2 1.9 1.2 3.2 0 4.6-2.8 5.6-5.5 5.9.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6A12 12 0 0 0 12 .3Z" />
     </svg>
   );
 }
@@ -70,6 +79,18 @@ export function Hero() {
                 <DownloadIcon />
                 {ui.heroSecondary}
               </a>
+              {profile.contacts.github ? (
+                <a
+                  href={externalUrl(profile.contacts.github)}
+                  target="_blank"
+                  rel="noreferrer noopener"
+                  className="btn-ghost"
+                  title={`在 GitHub 打开：${profile.contacts.github}`}
+                >
+                  <GithubIcon />
+                  {labels.github}
+                </a>
+              ) : null}
             </div>
           </div>
 

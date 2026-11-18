@@ -1,11 +1,8 @@
 ﻿import { profile, resumeDownloadName } from '../../data/resume';
 import { labels, navItems, sections, ui } from '../../data/site';
+import { displayUrl, externalUrl } from '../../lib/url';
 import { SectionLink } from '../ui/SectionLink';
 import { MailReveal } from '../ui/MailReveal';
-
-function toUrl(value: string) {
-  return /^https?:\/\//i.test(value) ? value : `https://${value}`;
-}
 
 export function Footer() {
   const year = new Date().getFullYear();
@@ -16,7 +13,11 @@ export function Footer() {
     contacts.push({ label: labels.phone, value: profile.contacts.phone, href: `tel:${profile.contacts.phone}` });
   }
   if (profile.contacts.github) {
-    contacts.push({ label: labels.github, value: profile.contacts.github, href: toUrl(profile.contacts.github) });
+    contacts.push({
+      label: labels.github,
+      value: displayUrl(profile.contacts.github),
+      href: externalUrl(profile.contacts.github),
+    });
   }
   if (profile.contacts.wechat) {
     contacts.push({ label: labels.wechat, value: profile.contacts.wechat, href: null });
@@ -46,6 +47,9 @@ export function Footer() {
                   {contact.href ? (
                     <a
                       href={contact.href}
+                      {...(/^https?:/i.test(contact.href)
+                        ? { target: '_blank', rel: 'noreferrer noopener' }
+                        : {})}
                       className="break-all font-mono text-[12.5px] text-ink transition-colors duration-150 hover:text-accent"
                     >
                       {contact.value}

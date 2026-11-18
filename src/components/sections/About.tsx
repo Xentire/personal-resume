@@ -1,13 +1,16 @@
 import { aboutHighlights, education, learning, philosophy, profile } from '../../data/resume';
 import { labels, sections } from '../../data/site';
+import { displayUrl, externalUrl } from '../../lib/url';
 import { MailReveal } from '../ui/MailReveal';
 import { Section } from '../layout/Section';
 
+type InfoRow = { label: string; value: string; href?: string } | { label: string; email: string };
+
 export function About() {
-  /** 普通行是纯文本；邮箱走反爬组件，所以单独一个变体 */
-  const infoRows: Array<{ label: string; value: string } | { label: string; email: string }> = [];
-  const push = (label: string, value: string | null | undefined) => {
-    if (value) infoRows.push({ label, value });
+  /** 普通行是纯文本（href 可选，外链才给）；邮箱走反爬组件，所以单独一个变体 */
+  const infoRows: InfoRow[] = [];
+  const push = (label: string, value: string | null | undefined, href?: string) => {
+    if (value) infoRows.push({ label, value, href });
   };
   push('姓名', profile.name);
   push('性别', profile.gender);
@@ -15,6 +18,10 @@ export function About() {
   push('求职意向', profile.targetRole);
   if (profile.contacts.email) infoRows.push({ label: labels.email, email: profile.contacts.email });
   push(labels.phone, profile.contacts.phone);
+  if (profile.contacts.github) {
+    push(labels.github, displayUrl(profile.contacts.github), externalUrl(profile.contacts.github));
+  }
+  push(labels.wechat, profile.contacts.wechat);
   push('现居', profile.location);
 
   return (
@@ -31,6 +38,16 @@ export function About() {
                 >
                   {'email' in row ? (
                     <MailReveal email={row.email} />
+                  ) : row.href ? (
+                    <a
+                      href={row.href}
+                      target="_blank"
+                      rel="noreferrer noopener"
+                      className="transition-colors duration-150 hover:text-accent"
+                      title={`在新标签打开：${row.href}`}
+                    >
+                      {row.value}
+                    </a>
                   ) : (
                     <span title={row.value}>{row.value}</span>
                   )}
