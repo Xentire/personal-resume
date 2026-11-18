@@ -581,14 +581,30 @@ async function main() {
   if (!resume.profile.name) throw new Error('未能从 PDF 中解析出姓名，请检查简历首行格式');
 
   fs.mkdirSync(CONTENT_DIR, { recursive: true });
-  fs.writeFileSync(OUT_JSON, `${JSON.stringify(resume, null, 2)}\n`, 'utf8');
+
+  // 内容没变就不重写：否则每次 npm run dev（predev 会跑 sync）都只改一个 syncedAt，
+  // 工作区永远是脏的，真正改动反而看不出来
+  const nextText = `${JSON.stringify(resume, null, 2)}\n`;
+  const prevText = fs.existsSync(OUT_JSON) ? fs.readFileSync(OUT_JSON, 'utf8') : '';
+  // 仓库开着 core.autocrlf，检出后的文件是 CRLF，比较前必须归一化，否则永远「不相等」
+  const stripSyncedAt = (text) =>
+    text.replace(/\r\n?/g, '\n').replace(/"syncedAt":\s*"[^"]*"/, '"syncedAt": ""');
+  if (prevText && stripSyncedAt(prevText) === stripSyncedAt(nextText)) {
+    log(`解析结果与 content/resume.json 一致，跳过写入（syncedAt 保持 ${JSON.parse(prevText).meta?.syncedAt ?? '未知'}）`);
+  } else {
+    fs.writeFileSync(OUT_JSON, nextText, 'utf8');
+  }
 
   // 同步一份 PDF 到 public/，供页面「下载简历」使用
   try {
     fs.mkdirSync(PUBLIC_DIR, { recursive: true });
     const publicPdf = path.join(PUBLIC_DIR, 'resume.pdf');
     const srcStat = fs.statSync(pdfPath);
-    const needCopy = !fs.existsSync(publicPdf) || fs.statSync(publicPdf).size !== srcStat.size;
+    // 只比大小会漏掉「改了两个字、导出体积刚好一样」的情况，所以把修改时间也纳入判断
+    const needCopy =
+      !fs.existsSync(publicPdf) ||
+      fs.statSync(publicPdf).size !== srcStat.size ||
+      Math.abs(fs.statSync(publicPdf).mtimeMs - srcStat.mtimeMs) > 1000;
     if (needCopy) fs.copyFileSync(pdfPath, publicPdf);
   } catch (err) {
     log(`复制 PDF 到 public/ 失败：${err.message}`);

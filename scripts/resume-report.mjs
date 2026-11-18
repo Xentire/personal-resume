@@ -151,9 +151,14 @@ if (extAwards && extAwards !== jsonAwards) {
 
 const pdfCandidates = fs.readdirSync(ROOT).filter((f) => f.toLowerCase().endsWith('.pdf'));
 const syncedAt = current.meta?.syncedAt ? new Date(current.meta.syncedAt) : null;
+// 解析内容没变时 sync 不会重写 resume.json（syncedAt 停在上次真改动），
+// 所以还要看「下载副本」有没有跟上：副本 mtime 追平源 PDF 就说明已经同步过
+const publicPdf = path.join(ROOT, 'public', 'resume.pdf');
+const publicMtime = fs.existsSync(publicPdf) ? fs.statSync(publicPdf).mtime : null;
 for (const file of pdfCandidates) {
   const stat = fs.statSync(path.join(ROOT, file));
-  if (syncedAt && stat.mtime > syncedAt) {
+  const syncedAgain = publicMtime && stat.mtime <= publicMtime;
+  if (syncedAt && stat.mtime > syncedAt && !syncedAgain) {
     warnings.push(`${file} 的修改时间晚于上次同步（${current.meta.syncedAt}），改完简历记得跑 npm run resume:sync`);
   }
 }

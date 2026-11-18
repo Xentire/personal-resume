@@ -267,15 +267,20 @@ Vercel 的 `rewrites` / CF 的 SPA 回退都会先匹配真实文件，所以 `/
 
 ### 更新简历（不用找人改代码）
 
-改完简历只需三步，**文案类修改完全自助**，不需要动任何 `.tsx`：
+页面上「下载简历」按钮指向 `/resume.pdf`，读的是 **`public/resume.pdf`**——它只是根目录那份简历的副本，
+不用手动维护。改简历只改根目录的 PDF：
 
 ```bash
-# 1. 用新 PDF 覆盖根目录同名文件（文件名可以变，脚本会自动找 *.pdf）
-# 2. 重新解析：会重写 content/resume.json，并把 PDF 复制到 public/resume.pdf
+# 1. 把新 PDF 放进项目根目录（文件名随便，脚本按修改时间取最新的那个 *.pdf）
+#    旧的那份顺手删掉，别让两份并存，否则容易搞不清用的是哪份
+# 2. 重新解析：重写 content/resume.json（页面文案）+ 复制 PDF 到 public/resume.pdf（下载文件）
 npm run resume:sync
 # 3. 自检：逐条列出「相对上次提交」解析结果变了什么，并检查 ext 名字是否对不上
 npm run resume:report
 ```
+
+> 解析结果和上次完全一样时，第 2 步会跳过写 `content/resume.json`（只更新 `public/resume.pdf`），
+> 所以纯排版微调不会在 git 里留下一个只有时间戳的 diff。
 
 `npm run resume:report` 会打印三类信息：
 
@@ -289,6 +294,13 @@ npm run resume:report
 ```bash
 git add content/resume.json public/resume.pdf && git commit -m "chore(resume): 同步简历"
 ```
+
+两个容易踩的点：
+
+- **下载下来的文件名不是 `resume.pdf`**：`<a download>` 用的 `resumeDownloadName` 是 `${姓名}-${岗位}.pdf`
+  （拼法在 `src/data/resume.ts` 末尾），所以 HR 存下来是「徐维宇-后端开发.pdf」。改这个要动代码。
+- **线上还会缓存一小时**：`public/_headers` 给 `/resume.pdf` 设了 1h 缓存，刚部署完自己测可能还是旧版，
+  加个 `?v=2` 或等一小时；要更实时就把那条 `Cache-Control` 调短。
 
 **什么时候还是得改代码**：
 
