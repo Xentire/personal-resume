@@ -93,6 +93,9 @@ export const ui = {
   ],
   projectDetail: '查看详情',
   projectDetailNotes: '项目详述',
+  /** 首页项目区分组标题：上面是带详情页的大项目，下面是没有详情页的小作品 */
+  otherDemos: '其他小作品',
+  otherDemosHint: '没有独立详情页，直接给仓库或在线地址。',
   /** 项目详情页左侧模块锚点导航的小标题 */
   projectToc: '本页导航',
   projectNoContent: '这个项目还没有填写内容。',
@@ -113,6 +116,9 @@ export const ui = {
   blogEmptyBody: '往 content/posts/ 里放一个 .md 文件，构建时会自动出现在这里；文件名即链接。',
   blogMissingTitle: '没有找到这篇文章',
   blogMissingBody: '链接可能过期了，或者文件名改过。回到列表看看当前有哪些文章。',
+  /** 邮箱反爬：首屏不出现明文，点了才显示并复制 */
+  emailReveal: '点击查看邮箱',
+  emailCopied: '已复制',
   themeLabel: '换配色',
   themeHint: '仅保存在本机',
 } as const;

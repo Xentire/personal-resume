@@ -1,9 +1,11 @@
 import { aboutHighlights, education, learning, philosophy, profile } from '../../data/resume';
 import { labels, sections } from '../../data/site';
+import { MailReveal } from '../ui/MailReveal';
 import { Section } from '../layout/Section';
 
 export function About() {
-  const infoRows: Array<{ label: string; value: string }> = [];
+  /** 普通行是纯文本；邮箱走反爬组件，所以单独一个变体 */
+  const infoRows: Array<{ label: string; value: string } | { label: string; email: string }> = [];
   const push = (label: string, value: string | null | undefined) => {
     if (value) infoRows.push({ label, value });
   };
@@ -11,7 +13,7 @@ export function About() {
   push('性别', profile.gender);
   push('年龄', profile.age ? `${profile.age} 岁` : null);
   push('求职意向', profile.targetRole);
-  push(labels.email, profile.contacts.email);
+  if (profile.contacts.email) infoRows.push({ label: labels.email, email: profile.contacts.email });
   push(labels.phone, profile.contacts.phone);
   push('现居', profile.location);
 
@@ -24,8 +26,14 @@ export function About() {
             {infoRows.map((row) => (
               <div key={row.label} className="flex items-baseline justify-between gap-4 border-b border-line/80 py-3">
                 <dt className="shrink-0 text-[11px] text-faint">{row.label}</dt>
-                <dd className="truncate text-[13.5px] text-ink" title={row.value}>
-                  {row.value}
+                <dd
+                  className={`min-w-0 text-[13.5px] text-ink${'email' in row ? '' : ' truncate'}`}
+                >
+                  {'email' in row ? (
+                    <MailReveal email={row.email} />
+                  ) : (
+                    <span title={row.value}>{row.value}</span>
+                  )}
                 </dd>
               </div>
             ))}

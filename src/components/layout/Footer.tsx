@@ -1,6 +1,7 @@
 ﻿import { profile, resumeDownloadName } from '../../data/resume';
 import { labels, navItems, sections, ui } from '../../data/site';
 import { SectionLink } from '../ui/SectionLink';
+import { MailReveal } from '../ui/MailReveal';
 
 function toUrl(value: string) {
   return /^https?:\/\//i.test(value) ? value : `https://${value}`;
@@ -9,10 +10,8 @@ function toUrl(value: string) {
 export function Footer() {
   const year = new Date().getFullYear();
 
+  // 邮箱不进这个列表：它走 MailReveal，首屏不放明文、也不放 mailto
   const contacts: Array<{ label: string; value: string; href: string | null }> = [];
-  if (profile.contacts.email) {
-    contacts.push({ label: labels.email, value: profile.contacts.email, href: `mailto:${profile.contacts.email}` });
-  }
   if (profile.contacts.phone) {
     contacts.push({ label: labels.phone, value: profile.contacts.phone, href: `tel:${profile.contacts.phone}` });
   }
@@ -35,6 +34,12 @@ export function Footer() {
             <p className="mt-3 max-w-[40ch] text-[13px] leading-6 text-dim">{ui.footerDesc}</p>
 
             <ul className="mt-6 space-y-2.5">
+              {profile.contacts.email ? (
+                <li className="flex items-center gap-3">
+                  <span className="w-10 shrink-0 text-[11px] text-faint">{labels.email}</span>
+                  <MailReveal email={profile.contacts.email} />
+                </li>
+              ) : null}
               {contacts.map((contact) => (
                 <li key={contact.label} className="flex items-center gap-3">
                   <span className="w-10 shrink-0 text-[11px] text-faint">{contact.label}</span>

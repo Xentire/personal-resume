@@ -44,8 +44,6 @@ export function Skills() {
                 <span className="label-mono shrink-0">{group.tier ?? `${group.tags.length} 项`}</span>
               </header>
 
-              {group.note ? <p className="mt-1 text-[11.5px] text-faint">{group.note}</p> : null}
-
               <ul className={`mt-3.5${wide ? ' sm:grid sm:grid-cols-2 sm:gap-x-10' : ''}`}>
                 {group.tags.map((tag) => (
                   <li
@@ -62,6 +60,13 @@ export function Skills() {
                   </li>
                 ))}
               </ul>
+
+              {/* 分组注解：这组技术在哪个项目落地、解决什么问题。mt-auto 让同类卡片底部的注解对齐 */}
+              {group.note ? (
+                <div className="mt-auto pt-4">
+                  <p className="border-t border-line/60 pt-3 text-[11.5px] leading-5 text-faint">{group.note}</p>
+                </div>
+              ) : null}
             </article>
           );
         })}

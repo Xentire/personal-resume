@@ -76,11 +76,30 @@ src/components/**                ← 只做渲染，零履历文案
 | --- | --- | --- |
 | 给简历里已有的项目/实习补指标、要点、架构图、链接 | `content/resume.ext.json` 里同名对象 | 不用 |
 | 简历里**没有**的新项目 / 新实习 | `content/resume.ext.json` → `projects.extra` / `internships.extra` | 不用 |
+| 首页「其他小作品」里的 Demo | `content/resume.ext.json` → `demos` | 不用 |
 | 新文章（个人分享） | 新建 `content/posts/my-post.md` | 不用 |
 | 项目详情页的长文 | 新建 `content/projects/<项目名>.md` | 不用 |
 | 一整类新页面（如博客列表、单独的经历页） | `src/App.tsx` 加一条 `<Route>` + 在 `src/pages/` 建组件 | 要 |
-| 新竞赛、调整技能标签 | `content/resume.ext.json` → `awards` / `skills`（整体替换） | 不用 |
+| 新竞赛、调整技能标签 / 分组注解 | `content/resume.ext.json` → `awards` / `skills`（整体替换） | 不用 |
 | 新增整个板块 | 见下方「加一个板块」 | 要 |
+
+### 首页项目区的两个分区
+
+上面是 **Featured**（有独立详情页，`/projects/:slug`），下面是 **其他小作品**（`demos`，紧凑卡片、只有外链、没有详情页）。
+`demos` 为空数组时整个分区不渲染，所以可以先留空。
+
+```json
+"demos": [
+  {
+    "name": "小工具名（必填）",
+    "desc": "一句话说明，最多显示两行",
+    "tags": ["Python", "CLI"],
+    "links": [{ "label": "源码", "href": "https://github.com/..." }]
+  }
+]
+```
+
+`name` 必填，其余可选；`links` 最多显示前两个，`label` 不写会自动取 URL 去掉协议头。
 
 **为什么新项目不写 `resume.json`**：它每次 `npm run dev` / `npm run build` 都会被解析脚本全量重写，手写内容会丢。所以新条目统一放 ext 的 `extra` 数组：
 
@@ -156,6 +175,18 @@ CSS，放进 `#0B0E14` 深色界面就是一块白板，六套深色主题下全
 **现状**：`About.tsx` 只有基础信息 / 教育经历 / 核心优势 / 开发理念 / 当前学习计划五块，
 代码里没有 `<audio>`、没有 `.mp3/.m4a` 引用，`public/` 只有 `_headers` 与 `resume.pdf`。
 若以后想放文字版爱好（读书 / 跑步这类），按「加一个板块」重新加即可，不需要恢复播放器。
+
+### 几个刻意的实现细节
+
+**技能分组注解**：`resume.ext.json` 里每个 `skills[]` 分组有 `note` 字段，卡片底部渲染成一行小字
+（`mt-auto` 保证同一行卡片注解对齐）。文案口径是「这组技术在哪个项目落地、解决什么问题」，
+不是罗列范围——例如「DataAgent · ES 双路召回 + RRF（k=60）融合，TopK 命中 61%→79%」。
+
+**邮箱反爬**：`components/ui/MailReveal.tsx`。首屏只渲染一个「点击查看邮箱」按钮，
+点击后才把地址拼进 DOM 并生成 `mailto:`，同时尝试写入剪贴板。实测点击前
+`a[href^="mailto:"]` 数量为 0、`body.innerText` 里搜不到邮箱正则。页面是纯客户端渲染，
+所以 HTML 源码里本来也没有邮箱；这层挡的是「执行 JS 再扫 DOM」的采集脚本。
+数据源 `resume.json` 里的字符串仍在 JS 包里，要彻底不落盘得改成构建期拼接，收益不大，没做。
 
 ### 项目详情页（多页面）
 

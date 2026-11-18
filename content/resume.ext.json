@@ -51,7 +51,7 @@
     {
       "group": "后端与框架",
       "tier": "CORE",
-      "note": "Java 并发与 Spring 生态",
+      "note": "问答机器人（会话上下文、多条件联查）与知行食光（鉴权切面、下单扣库存）。",
       "tags": [
         { "name": "Java 集合与并发", "level": 4, "scene": "问答机器人 · 会话上下文状态" },
         { "name": "HashMap / ConcurrentHashMap", "level": 4, "scene": "本地缓存选型" },
@@ -66,7 +66,7 @@
     {
       "group": "数据与中间件",
       "tier": "DATA",
-      "note": "存储、缓存与消息",
+      "note": "问答机器人 · 万级会话的慢 SQL 与热点缓存；知行食光 · Redisson 库存并发。",
       "tags": [
         { "name": "MySQL 索引与执行计划", "level": 4, "scene": "问答机器人 · 万级会话慢 SQL 优化" },
         { "name": "事务隔离级别", "level": 3, "scene": "知行食光 · 下单与库存一致性" },
@@ -80,7 +80,7 @@
     {
       "group": "AI 应用与 Agent",
       "tier": "AGENT",
-      "note": "编排、协议与流式链路",
+      "note": "DataAgent · 17 节点状态图跑多步规划；问答机器人 · SSE 推送与钉钉兜底。",
       "tags": [
         { "name": "LangGraph StateGraph", "level": 4, "scene": "DataAgent · 17 节点决策层" },
         { "name": "Plan-and-Execute", "level": 3, "scene": "DataAgent · 多步规划路线" },
@@ -96,7 +96,7 @@
     {
       "group": "RAG 与向量检索",
       "tier": "RAG",
-      "note": "召回、融合与评测",
+      "note": "DataAgent · ES 双路召回 + RRF（k=60）融合，TopK 命中 61%→79%。",
       "tags": [
         { "name": "文档切分策略", "level": 3, "scene": "DataAgent · TextSplitter 切片" },
         { "name": "向量 + BM25 混合检索", "level": 4, "scene": "DataAgent · ES 双路召回" },
@@ -108,7 +108,7 @@
     {
       "group": "工程工具",
       "tier": "INFRA",
-      "note": "交付、部署与排障",
+      "note": "DataAgent · Docker 隔离执行 Python；问答机器人 · Nacos 与 K8s 日志定位。",
       "tags": [
         { "name": "Docker", "level": 3, "scene": "DataAgent · 隔离执行 Python" },
         { "name": "Kubernetes 日志排查", "level": 3, "scene": "问答机器人 · 线上异常定位" },
@@ -162,6 +162,7 @@
       }
     }
   },
+  "demos": [],
   "awards": [
     {
       "title": "蓝桥杯",

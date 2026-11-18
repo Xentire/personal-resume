@@ -127,6 +127,16 @@ const text = (value: unknown): string | null => {
 const list = (value: unknown): string[] =>
   Array.isArray(value) ? value.map((item) => String(item).trim()).filter(Boolean) : [];
 
+/**
+ * 通用「对象数组 → 类型化数组」归一化：pick 返回 null 的条目会被丢掉。
+ * 放在取值工具区而不是各段旁边——下面多个导出都用它，定义必须在调用之前，
+ * 否则模块求值时直接撞 TDZ（Cannot access before initialization）。
+ */
+const namedList = <T,>(value: unknown, pick: (row: Record<string, unknown>) => T | null): T[] =>
+  Array.isArray(value)
+    ? value.map((item) => pick(record(item))).filter((item): item is T => item !== null)
+    : [];
+
 const stackGroups = (value: unknown): StackGroup[] => {
   if (!Array.isArray(value)) return [];
   return value
@@ -378,6 +388,28 @@ export const projects: Project[] = [
     .filter((item): item is Project => item !== null),
 ];
 
+/**
+ * 小作品 / Demo：不走详情页，只占首页「其他小作品」的紧凑卡片。
+ * 数据在 resume.ext.json 的 demos 数组里，没有就整块不渲染（所以可以先留空）。
+ */
+export interface Demo {
+  name: string;
+  desc: string | null;
+  tags: string[];
+  links: ProjectLink[];
+}
+
+export const demos: Demo[] = namedList(ext.demos, (row) => {
+  const name = text(row.name);
+  if (!name) return null;
+  return {
+    name,
+    desc: text(row.desc),
+    tags: list(row.tags),
+    links: projectLinks(row.links),
+  };
+});
+
 /** ext 里写了却没匹配上简历条目的 key（多半是 PDF 里改了名称），仅在 dev 期提示 */
 const RESERVED_EXT_KEYS = new Set(['_comment', 'extra']);
 
@@ -451,11 +483,6 @@ export interface LearningItem {
   note: string;
   status: string | null;
 }
-
-const namedList = <T,>(value: unknown, pick: (row: Record<string, unknown>) => T | null): T[] =>
-  Array.isArray(value)
-    ? value.map((item) => pick(record(item))).filter((item): item is T => item !== null)
-    : [];
 
 export const philosophy: Principle[] = namedList(aboutRaw.philosophy, (row) => {
   const title = text(row.title);
