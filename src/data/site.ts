@@ -79,7 +79,15 @@ export const ui = {
   /** 项目详情页左侧模块锚点导航的小标题 */
   projectToc: '本页导航',
   projectNoContent: '这个项目还没有填写内容。',
-  diagramTitle: '架构图',  diagramHint: '可左右滑动查看完整架构图',
+  /** 爱好板块：曲目右侧的平台名（与 resume.ts 里的链接生成规则对应） */
+  platformNetease: '网易云',
+  platformQq: 'QQ 音乐',
+  /** 曲目行右侧空间紧，用短名 */
+  platformQqShort: 'QQ',
+  trackUnit: '首',
+  musicHint: '点击曲目跳转官方平台收听，本站不托管、不播放任何音频文件。',
+  diagramTitle: '架构图',
+  diagramHint: '可左右滑动查看完整架构图',
   diagramLoading: '渲染中…',
   diagramError: '架构图渲染失败，已回退为源码',
   postExpand: '展开全文',
@@ -105,6 +113,10 @@ export const labels = {
   projectStackAndRepo: '技术栈与仓库',
   projectRepo: '公开仓库',
   academic: '学业表现',
+  /** About 板块的三块附加内容 */
+  philosophy: '开发理念',
+  learning: '当前学习计划',
+  interests: '兴趣爱好',
   email: '邮箱',
   phone: '电话',
   github: 'GitHub',

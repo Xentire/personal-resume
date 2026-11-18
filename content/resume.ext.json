@@ -14,6 +14,53 @@
         "title": "工程习惯",
         "desc": "偏好把效果写进指标：一次通过率、TopK 命中率、首字延迟都要可测量、可回归。"
       }
+    ],
+    "philosophy": [
+      {
+        "title": "先跑稳，再跑聪明",
+        "desc": "编排再花，链路不稳就是负资产。默认值、超时分层、降级路径、失败可解释，这些要写在功能前面。"
+      },
+      {
+        "title": "每个改动先有基线，再谈优化",
+        "desc": "一次通过率、TopK 命中率、首字延迟，改之前先量一次；改完能复算，说不清收益的优化不做。"
+      },
+      {
+        "title": "可观测是功能的一部分",
+        "desc": "节点耗时、错误归因、协议帧要能从日志里看出来。排障靠证据，不靠猜。"
+      }
+    ],
+    "learning": [
+      {
+        "topic": "Kubernetes 从排障到自建",
+        "note": "目前停在看日志、查 Pod 状态；下一步自己写 Deployment / HPA，把一次真实发布走完。",
+        "status": "进行中"
+      },
+      {
+        "topic": "RAG 评测接进 CI",
+        "note": "项目里 74%→91% 是离线跑出来的；想把评测集做成回归门禁，改 prompt 或换模型时自动报警。",
+        "status": "进行中"
+      },
+      {
+        "topic": "分布式事务与分库分表",
+        "note": "简历上只到「了解」。计划从 Seata 的 AT 模式入手，再补一次真实的分库分表改造。",
+        "status": "计划中"
+      }
+    ]
+  },
+  "interests": {
+    "_comment": "只存歌单元数据与平台链接，站内不托管、不播放任何音频；neteaseId / qqMid 留空时自动降级成该平台的搜索页，不会 404。加歌只改这里，组件不用动。",
+    "artists": [
+      {
+        "name": "陈奕迅",
+        "songs": [
+          { "title": "任我行", "album": null, "neteaseId": "27483202", "qqMid": null },
+          { "title": "落花流水", "album": null, "neteaseId": "64922", "qqMid": null },
+          { "title": "沙龙", "album": null, "neteaseId": "64833", "qqMid": null },
+          { "title": "Shall We Talk", "album": null, "neteaseId": "67411", "qqMid": null },
+          { "title": "葡萄成熟时", "album": null, "neteaseId": "66285", "qqMid": null },
+          { "title": "阿猫阿狗", "album": null, "neteaseId": "27483200", "qqMid": null }
+        ]
+      }
     ]
   },
   "skills": [
