@@ -6,6 +6,7 @@ import { projectDoc } from '../data/projectDocs';
 import { labels, sections, ui } from '../data/site';
 import { renderMarkdown, splitSections } from '../lib/markdown';
 import { ArchitectureDiagram } from '../components/ui/ArchitectureDiagram';
+import { DetailSection, detailAnchorOf } from '../components/ui/DetailSection';
 import { BulletList, MetricStrip, StackList, SubHeading } from '../components/ui/Primitives';
 
 /**
@@ -27,26 +28,6 @@ interface ModuleSpec {
   id: string;
   title: string;
   content: ReactNode;
-}
-
-/** 标题 → 锚点 id：中文标题只需要去掉空白与标点，够用且稳定 */
-const anchorOf = (title: string): string =>
-  title
-    .trim()
-    .toLowerCase()
-    .replace(/[\s/\\·、，,。.：:；;（）()【】[\]]+/g, '-')
-    .replace(/^-+|-+$/g, '');
-
-function Module({ id, index, title, children }: { id: string; index: string; title: string; children: ReactNode }) {
-  return (
-    <section id={id} className="scroll-mt-24">
-      <h2 className="flex items-baseline gap-2.5 border-b border-line pb-2">
-        <span className="font-mono text-[11px] tabular-nums text-accent">{index}</span>
-        <span className="text-[15px] font-medium tracking-tight text-ink md:text-[16px]">{title}</span>
-      </h2>
-      <div className="mt-4">{children}</div>
-    </section>
-  );
 }
 
 export function ProjectDetail() {
@@ -119,7 +100,7 @@ export function ProjectDetail() {
       structured[hit] = { ...structured[hit], content: node };
       continue;
     }
-    structured.push({ id: anchorOf(section.heading), title: section.heading, content: node });
+    structured.push({ id: detailAnchorOf(section.heading), title: section.heading, content: node });
   }
 
   /* ---------- 末尾固定：技术栈 + 公开仓库 ---------- */
@@ -209,9 +190,9 @@ export function ProjectDetail() {
           <MetricStrip metrics={project.metrics} title={labels.projectMetrics} />
 
           {modules.map((item, position) => (
-            <Module key={item.id} id={item.id} index={String(position + 1).padStart(2, '0')} title={item.title}>
+            <DetailSection key={item.id} id={item.id} index={String(position + 1).padStart(2, '0')} title={item.title}>
               {item.content}
-            </Module>
+            </DetailSection>
           ))}
 
           {!modules.length ? <p className="text-[13px] leading-6 text-faint">{ui.projectNoContent}</p> : null}

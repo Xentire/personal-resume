@@ -93,6 +93,13 @@ export const ui = {
   ],
   projectDetail: '查看详情',
   projectDetailNotes: '项目详述',
+  /** 实习经历：首页卡片进详情页的按钮与返回按钮 */
+  experienceDetail: '查看详情',
+  experienceBack: '← 返回实习列表',
+  /** 详情页左侧锚点导航的小标题（与项目详情页区分开） */
+  experienceToc: '本页导航',
+  experienceNoContent: '这段实习还没有填写内容。',
+  chainHint: '可左右滑动查看完整链路',
   /** 首页项目区分组标题：上面是带详情页的大项目，下面是没有详情页的小作品 */
   otherDemos: '其他小作品',
   otherDemosHint: '没有独立详情页，直接给仓库或在线地址。',
@@ -129,6 +136,7 @@ export const labels = {
   highlights: '核心优势',
   stack: '技术栈',
   summary: '项目描述',
+  internshipSummary: '实习概述',
   features: '核心工作',
   engineering: '工程实践',
   metrics: '量化成果',
@@ -139,6 +147,12 @@ export const labels = {
   projectImplementation: '核心实现',
   projectStackAndRepo: '技术栈与仓库',
   projectRepo: '公开仓库',
+  /** 实习详情页的固定模块标题（markdown 里 h2 同名即可覆盖） */
+  experienceIntro: '实习简介',
+  experienceChain: '链路与架构',
+  experienceStack: '技术栈',
+  /** 首页实习卡片里的粗略链路图标题 */
+  chain: '链路',
   academic: '学业表现',
   /** About 板块的两块附加内容 */
   philosophy: '开发理念',

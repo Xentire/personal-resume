@@ -3,7 +3,7 @@ import type { Project } from '../../data/resume';
 import { demos, projects } from '../../data/resume';
 import { labels, sections, ui } from '../../data/site';
 import { Section } from '../layout/Section';
-import { MetricStrip, Tag } from '../ui/Primitives';
+import { actionClass, MetricStrip, Tag } from '../ui/Primitives';
 
 /**
  * 首页只放摘要，长文下沉到 /projects/:slug。
@@ -31,10 +31,6 @@ function repoOf(project: Project) {
     ) ?? null
   );
 }
-
-/** 卡片底部的小号按钮：沿用 btn-ghost 的令牌组合，只把尺寸收小 */
-const actionClass =
-  'inline-flex items-center gap-1.5 rounded-[2px] border border-line bg-surface px-3 py-1.5 font-mono text-[11.5px] text-ink transition-colors duration-150 hover:border-line-strong hover:bg-elevated';
 
 export function Projects() {
   return (

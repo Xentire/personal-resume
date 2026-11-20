@@ -5,6 +5,7 @@ import { Navbar } from './components/layout/Navbar';
 import { ScrollManager } from './components/layout/ScrollManager';
 import { profile } from './data/resume';
 import { Blog } from './pages/Blog';
+import { ExperienceDetail } from './pages/ExperienceDetail';
 import { Home } from './pages/Home';
 import { PostDetail } from './pages/PostDetail';
 import { ProjectDetail } from './pages/ProjectDetail';
@@ -39,6 +40,7 @@ export default function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/projects/:slug" element={<ProjectDetail />} />
+            <Route path="/experience/:slug" element={<ExperienceDetail />} />
             <Route path="/blog" element={<Blog />} />
             <Route path="/blog/:slug" element={<PostDetail />} />
             <Route path="*" element={<NotFound />} />

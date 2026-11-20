@@ -6,6 +6,13 @@ export function Tag({ children }: { children: ReactNode }) {
   return <span className="tag">{children}</span>;
 }
 
+/**
+ * 卡片底部的小号按钮：沿用 btn-ghost 的令牌组合，只把尺寸收小。
+ * 项目卡片、实习卡片、详情页的仓库/外链按钮共用这一份，避免各写一遍走样。
+ */
+export const actionClass =
+  'inline-flex items-center gap-1.5 rounded-[2px] border border-line bg-surface px-3 py-1.5 font-mono text-[11.5px] text-ink transition-colors duration-150 hover:border-line-strong hover:bg-elevated';
+
 /** 熟练度条：4 段，填充段数 = 等级 */
 export function LevelBar({ level, label }: { level: number; label?: string }) {
   return (

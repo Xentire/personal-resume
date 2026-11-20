@@ -120,9 +120,24 @@
     }
   ],
   "internships": {
-    "_comment": "以简历中的项目名为 key 覆盖字段（features / engineering / metrics）；extra 数组里可以手写简历里没有的实习条目，格式同 base 条目（company 必填）。",
+    "_comment": "以简历中的项目名为 key 覆盖字段（features / engineering / metrics / chain / architecture）；extra 数组里可以手写简历里没有的实习条目，格式同 base 条目（company 必填）。chain 是首页卡片里的粗略链路图（字符串数组，或 { steps:[{label,note}], branch:{label,note} }），architecture 是详情页的完整 mermaid 图。",
     "extra": [],
     "智能问答机器人": {
+      "chain": {
+        "steps": [
+          { "label": "渠道接入", "note": "钉钉 / 微信公众号" },
+          { "label": "意图识别", "note": "多轮状态 · 槽位补全" },
+          { "label": "权限过滤", "note": "部门 / 岗位 / 角色" },
+          { "label": "知识检索", "note": "RAGFlow / WeKnora" },
+          { "label": "生成 · 流式", "note": "LLM + SSE" },
+          { "label": "结果回传", "note": "Token 级 + 来源" }
+        ],
+        "branch": { "label": "人工兜底", "note": "无法解答 → 钉钉待办派单" }
+      },
+      "architecture": {
+        "caption": "双渠道接入 → 意图识别 → 权限过滤 → 知识检索 → 流式回传；无法解答时旁路到人工兜底",
+        "mermaid": "flowchart TB\n  CH[\"钉钉 / 微信公众号<br/>双渠道接入\"] --> GW[\"消息接入与鉴权<br/>SpringBoot · Nacos\"]\n  GW --> NLU[\"意图识别<br/>多轮状态 · 槽位补全\"]\n  NLU -->|知识问答| PM[\"权限过滤<br/>部门 / 岗位 / 角色\"]\n  NLU -->|闲聊等其他| GEN[\"大模型生成\"]\n  PM --> RAG[\"知识检索<br/>RAGFlow / WeKnora\"]\n  RAG --> GEN\n  NLU -.->|无法解答| HITL[\"人工兜底<br/>钉钉待办派单\"]\n  GEN --> OUT[\"SSE 流式推送<br/>Token 级 + 文档来源<br/>回传原渠道\"]\n  KB[(\"知识文档<br/>MinIO → WeKnora\")] -.-> RAG"
+      },
       "metrics": [
         { "label": "接入渠道", "value": "2 个" },
         { "label": "单表数据量级", "value": "万级会话" },

@@ -76,11 +76,32 @@ export interface Internship {
   features: string[];
   engineering: string[];
   metrics: Metric[];
+  /** 详情页路由用的 slug（= 项目名，没有项目名就用公司名） */
+  slug: string;
+  /** 首页卡片里的粗略链路图，ext 里 chain 没写就为 null */
+  chain: Chain | null;
+  /** 详情页的完整架构图（mermaid），ext 里 architecture 没写就为 null */
+  architecture: Architecture | null;
 }
 
 export interface Architecture {
   caption: string | null;
   mermaid: string;
+}
+
+/**
+ * 粗略链路图的一个节点：label 是主标签，note 是可选的补充（技术 / 范围）。
+ * 首页实习卡片只画这条链，完整架构图在 /experience/:slug 里。
+ */
+export interface ChainStep {
+  label: string;
+  note: string | null;
+}
+
+export interface Chain {
+  steps: ChainStep[];
+  /** 旁路（例如「无法解答 → 人工兜底」），画在链路下面一行 */
+  branch: ChainStep | null;
 }
 
 export interface ProjectLink {
@@ -161,6 +182,38 @@ const metrics = (value: unknown): Metric[] => {
 
 const record = (value: unknown): Record<string, unknown> =>
   value && typeof value === 'object' ? (value as Record<string, unknown>) : {};
+
+/** 链路节点：扩展层里可以只写字符串，也可以写 { label, note } */
+const chainStep = (value: unknown): ChainStep | null => {
+  if (typeof value === 'string') {
+    const label = text(value);
+    return label ? { label, note: null } : null;
+  }
+  const row = record(value);
+  const label = text(row.label);
+  return label ? { label, note: text(row.note) } : null;
+};
+
+/**
+ * 粗略链路图。两种写法都支持：
+ *   "chain": ["渠道接入", "意图识别", ...]                 —— 只给主标签
+ *   "chain": { "steps": [...], "branch": { ... } }        —— 带旁路
+ */
+const chainOf = (value: unknown): Chain | null => {
+  const container = Array.isArray(value) ? {} : record(value);
+  const raw = Array.isArray(value) ? value : container.steps;
+  const steps = Array.isArray(raw)
+    ? raw.map(chainStep).filter((step): step is ChainStep => step !== null)
+    : [];
+  if (!steps.length) return null;
+  return { steps, branch: chainStep(container.branch) };
+};
+
+const architectureOf = (value: unknown): Architecture | null => {
+  const row = record(value);
+  const mermaid = text(row.mermaid);
+  return mermaid ? { caption: text(row.caption), mermaid } : null;
+};
 
 /* ------------------------------------------------------------------ */
 /* 基础层（来自 PDF 解析结果）                                        */
@@ -293,12 +346,13 @@ const baseInternships: Internship[] = Array.isArray(root.internships)
   ? root.internships.map((item) => {
       const row = record(item);
       const name = text(row.name);
+      const company = text(row.company) ?? '—';
       const override = record(name ? internshipExt[name] : null);
       const overrideFeatures = list(override.features);
       const overrideEngineering = list(override.engineering);
       return {
         name,
-        company: text(row.company) ?? '—',
+        company,
         role: text(row.role),
         subtitle: text(row.subtitle),
         period: text(row.period),
@@ -307,6 +361,9 @@ const baseInternships: Internship[] = Array.isArray(root.internships)
         features: overrideFeatures.length ? overrideFeatures : list(row.features),
         engineering: overrideEngineering.length ? overrideEngineering : list(row.engineering),
         metrics: metrics(override.metrics),
+        slug: name ?? company,
+        chain: chainOf(override.chain),
+        architecture: architectureOf(override.architecture),
       };
     })
   : [];
@@ -362,8 +419,9 @@ const normalizeExtraInternship = (value: unknown): Internship | null => {
   const row = record(value);
   const company = text(row.company);
   if (!company) return null;
+  const name = text(row.name);
   return {
-    name: text(row.name),
+    name,
     company,
     role: text(row.role),
     subtitle: text(row.subtitle),
@@ -373,6 +431,9 @@ const normalizeExtraInternship = (value: unknown): Internship | null => {
     features: list(row.features),
     engineering: list(row.engineering),
     metrics: metrics(row.metrics),
+    slug: name ?? company,
+    chain: chainOf(row.chain),
+    architecture: architectureOf(row.architecture),
   };
 };
 
