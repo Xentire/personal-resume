@@ -17,7 +17,7 @@ export function Experience() {
             <span aria-hidden className="absolute left-0 top-2 h-[calc(100%-0.5rem)] w-px bg-line" />
             <span
               aria-hidden
-              className="absolute left-[-3px] top-[9px] h-[7px] w-[7px] rounded-full border border-accent bg-base"
+              className="absolute left-[-3px] top-[9px] h-[7px] w-[7px] rotate-45 border border-accent bg-base"
             />
 
             <div className="card px-5 py-5 md:px-7 md:py-6">

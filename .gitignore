@@ -35,3 +35,6 @@ preview
 # headless 浏览器临时 profile 与一次性验证脚本
 .edge-*
 vite.config.ts.timestamp-*.mjs
+
+# Claude Code 本机权限白名单（含本地绝对路径），不提交
+.claude/settings.local.json

@@ -15,7 +15,7 @@ export function LevelBar({ level, label }: { level: number; label?: string }) {
           <span
             key={step}
             className={[
-              'h-[3px] w-3.5 rounded-full transition-colors duration-150',
+              'h-[3px] w-3.5 rounded-[1px] transition-colors duration-150',
               step <= level ? 'bg-accent' : 'bg-line',
             ].join(' ')}
           />
@@ -33,7 +33,7 @@ export function BulletList({ items }: { items: string[] }) {
     <ul className="space-y-2.5">
       {items.map((item, index) => (
         <li key={`${index}-${item.slice(0, 12)}`} className="relative pl-4 text-[13.5px] leading-[1.85] text-dim">
-          <span aria-hidden className="absolute left-0 top-[0.78em] h-[3px] w-[3px] rounded-full bg-faint" />
+          <span aria-hidden className="absolute left-0 top-[0.78em] h-[3px] w-[3px] rounded-[1px] bg-faint" />
           {item}
         </li>
       ))}
@@ -70,9 +70,9 @@ export function MetricStrip({ metrics, title }: { metrics: Metric[]; title?: str
         {metrics.map((metric) => (
           <div
             key={`${metric.label}-${metric.value}`}
-            className="flex min-w-[132px] flex-1 flex-col rounded border border-line bg-elevated px-4 py-3"
+            className="flex min-w-[132px] flex-1 flex-col rounded-[2px] border border-line bg-elevated px-4 py-3"
           >
-            <span className="font-mono text-[15px] leading-6 text-signal">{metric.value}</span>
+            <span className="font-mono text-[15px] leading-6 tabular-nums text-signal">{metric.value}</span>
             <span className="mt-1 text-[11px] leading-4 text-faint">{metric.label}</span>
           </div>
         ))}

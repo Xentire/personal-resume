@@ -25,7 +25,7 @@ export default {
         content: '1400px',
       },
       borderRadius: {
-        card: '10px',
+        card: '4px',
       },
       fontFamily: {
         sans: [

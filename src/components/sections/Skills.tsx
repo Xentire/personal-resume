@@ -23,16 +23,14 @@ export function Skills() {
         </div>
       </div>
 
-      <div className="grid gap-3 lg:grid-cols-2">
+      <div className="grid gap-x-10 gap-y-8 lg:grid-cols-2">
         {skillGroups.map((group, index) => {
           const wide = odd && index === skillGroups.length - 1;
 
           return (
             <article
               key={group.group}
-              className={`card flex flex-col p-5 transition-colors duration-150 hover:border-line-strong md:p-6${
-                wide ? ' lg:col-span-2' : ''
-              }`}
+              className={`flex flex-col border-t border-line pt-4 md:pt-5${wide ? ' lg:col-span-2' : ''}`}
             >
               <header className="flex items-baseline justify-between gap-3">
                 <h3 className="flex items-baseline gap-2 text-[15px] font-medium text-ink">

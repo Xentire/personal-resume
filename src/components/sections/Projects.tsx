@@ -34,7 +34,7 @@ function repoOf(project: Project) {
 
 /** 卡片底部的小号按钮：沿用 btn-ghost 的令牌组合，只把尺寸收小 */
 const actionClass =
-  'inline-flex items-center gap-1.5 rounded-card border border-line bg-surface px-3 py-1.5 font-mono text-[11.5px] text-ink transition-colors duration-150 hover:border-line-strong hover:bg-elevated';
+  'inline-flex items-center gap-1.5 rounded-[2px] border border-line bg-surface px-3 py-1.5 font-mono text-[11.5px] text-ink transition-colors duration-150 hover:border-line-strong hover:bg-elevated';
 
 export function Projects() {
   return (
@@ -47,7 +47,7 @@ export function Projects() {
           const stack = project.stackGroups.flatMap((group) => group.items);
 
           return (
-            <article key={`${project.name}-${project.period}`} className="card overflow-hidden">
+            <article key={`${project.name}-${project.period}`} className="card frame-corners overflow-hidden">
               <header className="border-b border-line px-5 py-5 md:px-7 md:py-6">
                 <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
                   <div className="flex items-start gap-3">

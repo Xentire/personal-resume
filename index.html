@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#0B0E14" />
+    <meta name="theme-color" content="#F7F8FA" />
     <meta name="description" content="后端工程师个人作品集" />
     <link
       rel="icon"
@@ -11,16 +11,16 @@
     />
     <title>Portfolio</title>
     <script>
-      // 在 CSS/React 之前把保存的配色写到 <html> 上，避免首屏先黑后变色
+      // 在 CSS/React 之前把保存的配色写到 <html> 上，避免首屏先闪一下默认色
       (function () {
+        var theme = 'paper';
         try {
           var saved = localStorage.getItem('portfolio-theme');
-          if (saved && /^[a-z]{3,16}$/.test(saved)) {
-            document.documentElement.setAttribute('data-theme', saved);
-          }
+          if (saved && /^[a-z]{3,16}$/.test(saved)) theme = saved;
         } catch (error) {
           /* 隐私模式下读不到 localStorage，用默认配色 */
         }
+        document.documentElement.setAttribute('data-theme', theme);
       })();
     </script>
   </head>

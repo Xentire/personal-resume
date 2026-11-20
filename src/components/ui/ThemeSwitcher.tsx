@@ -9,7 +9,7 @@ function Swatch({ theme, size = 'sm' }: { theme: ThemeOption; size?: 'sm' | 'md'
   return (
     <span
       aria-hidden
-      className={`inline-block shrink-0 rounded-full ring-1 ring-inset ring-black/30 ${
+      className={`inline-block shrink-0 rounded-[2px] ring-1 ring-inset ring-black/30 ${
         size === 'sm' ? 'h-3 w-3' : 'h-3.5 w-3.5'
       }`}
       style={{ backgroundColor: theme.chip }}
@@ -65,7 +65,7 @@ export function ThemeSwitcher({
         aria-haspopup="true"
         aria-expanded={open}
         aria-label={`${ui.themeLabel}，当前 ${current.label}`}
-        className="inline-flex items-center gap-2 rounded border border-line bg-elevated px-2.5 py-1.5 font-mono text-[11px] text-dim transition-colors duration-150 hover:border-line-strong hover:text-ink"
+        className="inline-flex items-center gap-2 rounded-[2px] border border-line bg-elevated px-2.5 py-1.5 font-mono text-[11px] text-dim transition-colors duration-150 hover:border-line-strong hover:text-ink"
       >
         <Swatch theme={current} />
         <span className={showLabel ? 'inline' : 'hidden sm:inline'}>{current.label}</span>
@@ -95,7 +95,7 @@ export function ThemeSwitcher({
                   setOpen(false);
                 }}
                 className={[
-                  'flex w-full items-center gap-2.5 rounded px-2 py-2 text-left text-[12.5px] transition-colors duration-150',
+                  'flex w-full items-center gap-2.5 rounded-[2px] px-2 py-2 text-left text-[12.5px] transition-colors duration-150',
                   active ? 'bg-elevated text-ink' : 'text-dim hover:bg-elevated hover:text-ink',
                 ].join(' ')}
               >

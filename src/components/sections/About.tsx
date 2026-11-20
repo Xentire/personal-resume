@@ -70,7 +70,7 @@ export function About() {
                   <p className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-[13px] text-dim">
                     {[item.degree, item.major].filter(Boolean).join(' · ')}
                     {item.note ? (
-                      <span className="rounded border border-accent/25 bg-accent/10 px-1.5 py-0.5 font-mono text-[11px] text-accent">
+                      <span className="rounded-[2px] border border-accent/25 bg-accent/10 px-1.5 py-0.5 font-mono text-[11px] text-accent">
                         {item.note}
                       </span>
                     ) : null}
@@ -90,7 +90,7 @@ export function About() {
                 className="card p-5 transition-colors duration-150 hover:border-line-strong"
               >
                 <div className="flex items-center gap-2">
-                  <span aria-hidden className="h-1 w-1 rounded-full bg-accent" />
+                  <span aria-hidden className="h-1.5 w-1.5 rounded-[1px] bg-accent" />
                   <span className="text-[13px] text-ink">{item.title}</span>
                 </div>
                 <p className="mt-2 text-[12.5px] leading-6 text-dim">{item.desc}</p>

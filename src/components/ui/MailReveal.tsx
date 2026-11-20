@@ -27,7 +27,7 @@ export function MailReveal({ email, className }: { email: string; className?: st
             .catch(() => setCopied(false));
         }}
         className={[
-          'inline-flex items-center gap-1.5 rounded border border-line bg-surface px-2.5 py-1 font-mono text-[11.5px] text-dim transition-colors duration-150 hover:border-line-strong hover:text-ink',
+          'inline-flex items-center gap-1.5 rounded-[2px] border border-line bg-surface px-2.5 py-1 font-mono text-[11.5px] text-dim transition-colors duration-150 hover:border-line-strong hover:text-ink',
           className ?? '',
         ].join(' ')}
       >

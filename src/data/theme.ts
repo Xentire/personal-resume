@@ -26,16 +26,16 @@ export interface ThemeOption {
 }
 
 export const themes: ThemeOption[] = [
-  { id: 'midnight', label: '深夜黑', hint: '默认', base: '#0B0E14', chip: '#39445C', tone: 'dark' },
+  { id: 'paper', label: '纸白', hint: '默认', base: '#F7F8FA', chip: '#AEB9CA', tone: 'light' },
+  { id: 'midnight', label: '深夜黑', hint: '夜', base: '#0B0E14', chip: '#39445C', tone: 'dark' },
   { id: 'graphite', label: '石墨灰', hint: '中性', base: '#0F1013', chip: '#6E737B', tone: 'dark' },
   { id: 'ocean', label: '深海蓝', hint: '冷调', base: '#0A1425', chip: '#2E5A9C', tone: 'dark' },
   { id: 'forest', label: '墨绿', hint: '静', base: '#091611', chip: '#2F6B52', tone: 'dark' },
   { id: 'plum', label: '暗紫', hint: '夜', base: '#151020', chip: '#5C4A8C', tone: 'dark' },
   { id: 'clay', label: '赭石', hint: '暖', base: '#17120E', chip: '#7A5A40', tone: 'dark' },
-  { id: 'paper', label: '纸白', hint: '日间', base: '#FFFFFF', chip: '#AEB9CA', tone: 'light' },
 ];
 
-export const DEFAULT_THEME = 'midnight';
+export const DEFAULT_THEME = 'paper';
 
 /** localStorage 的 key，只在本机生效，天然与他人隔离 */
 export const THEME_STORAGE_KEY = 'portfolio-theme';

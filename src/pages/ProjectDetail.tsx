@@ -41,7 +41,7 @@ function Module({ id, index, title, children }: { id: string; index: string; tit
   return (
     <section id={id} className="scroll-mt-24">
       <h2 className="flex items-baseline gap-2.5 border-b border-line pb-2">
-        <span className="font-mono text-[11px] text-faint">{index}</span>
+        <span className="font-mono text-[11px] tabular-nums text-accent">{index}</span>
         <span className="text-[15px] font-medium tracking-tight text-ink md:text-[16px]">{title}</span>
       </h2>
       <div className="mt-4">{children}</div>
@@ -140,7 +140,7 @@ export function ProjectDetail() {
                     href={link.href}
                     target="_blank"
                     rel="noreferrer noopener"
-                    className="inline-flex items-center gap-1.5 rounded-card border border-line bg-surface px-3 py-1.5 font-mono text-[11.5px] text-ink transition-colors duration-150 hover:border-line-strong hover:bg-elevated"
+                    className="inline-flex items-center gap-1.5 rounded-[2px] border border-line bg-surface px-3 py-1.5 font-mono text-[11.5px] text-ink transition-colors duration-150 hover:border-line-strong hover:bg-elevated"
                   >
                     {link.label}
                     <span aria-hidden className="text-faint">

@@ -37,16 +37,18 @@ export function Hero() {
   ];
 
   return (
-    <section id="top" className="relative overflow-hidden">
+    <section id="top" className="relative isolate overflow-hidden">
+      <div aria-hidden className="hero-grid pointer-events-none absolute inset-0 -z-10" />
+
       <div className="container-page pb-14 pt-28 md:pb-16 md:pt-32 xl:pt-36">
         <div className="grid gap-12 lg:grid-cols-12 lg:gap-10 xl:gap-16">
           <div className="lg:col-span-7">
-            <p className="inline-flex items-center gap-2 rounded-full border border-line bg-surface px-3 py-1">
-              <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-accent" />
-              <span className="font-mono text-[11px] tracking-[0.12em] text-dim">{ui.available}</span>
+            <p className="flex items-center gap-2 font-mono text-[11px] tracking-[0.14em] text-dim">
+              <span aria-hidden className="h-1.5 w-1.5 rounded-[1px] bg-accent" />
+              {ui.available}
             </p>
 
-            <h1 className="mt-6 text-[clamp(34px,5.2vw,58px)] font-medium leading-[1.08] tracking-tight text-ink">
+            <h1 className="mt-6 text-[clamp(34px,5.2vw,58px)] font-semibold leading-[1.06] tracking-[-0.035em] text-ink">
               {profile.name}
             </h1>
 
@@ -95,12 +97,10 @@ export function Hero() {
           </div>
 
           <div className="lg:col-span-5">
-            <div className="card overflow-hidden">
-              <div className="flex items-center gap-2 border-b border-line bg-elevated px-4 py-2.5">
-                <span aria-hidden className="h-2 w-2 rounded-full bg-line-strong" />
-                <span aria-hidden className="h-2 w-2 rounded-full bg-line-strong" />
-                <span aria-hidden className="h-2 w-2 rounded-full bg-line-strong" />
-                <span className="ml-2 font-mono text-[11px] text-faint">~/profile — bash</span>
+            <div className="card frame-corners overflow-hidden">
+              <div className="flex items-center justify-between border-b border-line bg-elevated px-4 py-2.5">
+                <span className="font-mono text-[11px] text-dim">~/profile</span>
+                <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-faint">bash</span>
               </div>
 
               <div className="space-y-4 px-5 py-5 font-mono text-[12.5px] leading-[1.75]">
@@ -128,7 +128,9 @@ export function Hero() {
           <div className="mt-10 grid grid-cols-2 gap-px overflow-hidden rounded-card border border-line bg-line sm:grid-cols-4 md:mt-12">
             {heroStats.map((stat) => (
               <div key={stat.label} className="bg-surface px-4 py-3.5 md:px-5">
-                <p className="font-mono text-[19px] leading-7 text-ink">{String(stat.value).padStart(2, '0')}</p>
+                <p className="font-mono text-[19px] leading-7 tabular-nums text-ink">
+                  {String(stat.value).padStart(2, '0')}
+                </p>
                 <p className="mt-0.5 text-[11px] text-faint">{stat.label}</p>
               </div>
             ))}

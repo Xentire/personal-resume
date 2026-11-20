@@ -76,32 +76,33 @@
 }
 
 /**
- * 纸白（日间）：唯一的浅色主题。
- * 底色纯白对应需求里的「白天全白」；卡片靠 1px 描边 + 极浅的 surface 与页面分层，
- * 不使用阴影（与深色主题同一套「靠描边分层」的做法）。
+ * 纸白（日间，默认）：唯一的浅色主题。
+ * 底色用带一点冷调的柔白，而不是纯白——纯白刺眼；也避开米黄/牛皮纸那种发昏的暖棕。
+ * 卡片比页面底色再亮一档，靠 1px 描边 + 这点明度差分层，不使用阴影
+ * （与深色主题同一套「靠描边分层」的做法）。
  *
- * 文字与强调色必须在这里重新定义：深色那套浅灰字放在白底上对比度只有 1.1:1。
+ * 文字与强调色必须在这里重新定义：深色那套浅灰字放在浅底上对比度只有 1.1:1。
  * 数值口径：
- *   ink   #15181E ≈ 17.8:1
- *   dim   #4F5764 ≈ 7.3:1
- *   faint #6E7786 ≈ 4.6:1（只用于 mono 小标签，保留深色主题里"弱化"的观感）
- *   accent #1F6FEB ≈ 4.6:1（白底上的可点击文字要 ≥4.5:1）
- *   signal #966610 ≈ 5.0:1
+ *   ink   #15181E ≈ 17.3:1
+ *   dim   #4F5764 ≈ 6.9:1
+ *   faint #67707F ≈ 4.7:1（只用于 mono 小标签，保留深色主题里"弱化"的观感）
+ *   accent #1A68DF ≈ 4.8:1（浅底上的可点击文字要 ≥4.5:1）
+ *   signal #966610 ≈ 4.7:1
  */
 [data-theme='paper'] {
   color-scheme: light;
 
-  --c-base: 255 255 255;
-  --c-surface: 250 251 253;
-  --c-elevated: 243 246 250;
-  --c-line: 228 233 241;
-  --c-line-strong: 200 209 223;
+  --c-base: 247 248 250;
+  --c-surface: 252 252 253;
+  --c-elevated: 241 243 246;
+  --c-line: 227 231 238;
+  --c-line-strong: 201 209 221;
 
   --c-ink: 21 24 30;
   --c-dim: 79 87 100;
-  --c-faint: 110 119 134;
-  --c-accent: 31 111 235;
-  --c-accent-hover: 24 95 205;
+  --c-faint: 103 112 127;
+  --c-accent: 26 104 223;
+  --c-accent-hover: 21 87 194;
   --c-signal: 150 102 16;
 }
 
@@ -133,7 +134,7 @@ body {
 ::-webkit-scrollbar-thumb {
   background: rgb(var(--c-line-strong));
   border: 3px solid rgb(var(--c-base));
-  border-radius: 999px;
+  border-radius: 2px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
@@ -149,8 +150,46 @@ body {
     @apply rounded-card border border-line bg-surface;
   }
 
+  /* 角标：只画左上 + 右下两个直角，像工程图上的裁切标记 */
+  .frame-corners {
+    position: relative;
+  }
+
+  .frame-corners::before,
+  .frame-corners::after {
+    content: '';
+    position: absolute;
+    width: 7px;
+    height: 7px;
+    pointer-events: none;
+  }
+
+  .frame-corners::before {
+    top: 0;
+    left: 0;
+    border-top: 1px solid rgb(var(--c-accent) / 0.55);
+    border-left: 1px solid rgb(var(--c-accent) / 0.55);
+  }
+
+  .frame-corners::after {
+    bottom: 0;
+    right: 0;
+    border-bottom: 1px solid rgb(var(--c-accent) / 0.55);
+    border-right: 1px solid rgb(var(--c-accent) / 0.55);
+  }
+
+  /* 首屏背景：渐隐的细网格，像蓝图坐标纸 */
+  .hero-grid {
+    background-image:
+      linear-gradient(rgb(var(--c-line) / 0.55) 1px, transparent 1px),
+      linear-gradient(90deg, rgb(var(--c-line) / 0.55) 1px, transparent 1px);
+    background-size: 56px 56px;
+    -webkit-mask-image: radial-gradient(ellipse 75% 70% at 50% 0%, #000 0%, transparent 74%);
+    mask-image: radial-gradient(ellipse 75% 70% at 50% 0%, #000 0%, transparent 74%);
+  }
+
   .tag {
-    @apply inline-flex items-center rounded border border-line bg-elevated px-2 py-0.5 font-mono text-[11px] leading-5 text-dim;
+    @apply inline-flex items-center rounded-[2px] border border-line bg-elevated/40 px-1.5 py-0.5 font-mono text-[10.5px] leading-4 text-dim;
   }
 
   .label-mono {
@@ -207,7 +246,7 @@ body {
 
   .md-body ul > li::before {
     content: '';
-    @apply absolute left-0 top-[0.8em] h-[3px] w-[3px] rounded-full bg-faint;
+    @apply absolute left-0 top-[0.8em] h-[3px] w-[3px] rounded-[1px] bg-faint;
   }
 
   .md-body ol {

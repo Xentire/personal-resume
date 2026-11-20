@@ -8,16 +8,16 @@ export function Awards() {
 
   return (
     <Section id="awards" index={sections.awards.index} title={sections.awards.title} desc={sections.awards.desc}>
-      <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+      <div className="grid gap-px overflow-hidden rounded-card border border-line bg-line md:grid-cols-2 xl:grid-cols-4">
         {awards.map((award, index) => (
           <article
             key={`${award.title}-${index}`}
-            className="card flex flex-col p-5 transition-colors duration-150 hover:border-line-strong"
+            className="flex flex-col bg-surface p-5 transition-colors duration-150 hover:bg-elevated/40"
           >
             <div className="flex items-start justify-between gap-3">
               <span className="font-mono text-[11px] text-faint">{String(index + 1).padStart(2, '0')}</span>
               {award.level ? (
-                <span className="rounded border border-signal/30 bg-signal/10 px-2 py-0.5 font-mono text-[11px] text-signal">
+                <span className="rounded-[2px] border border-signal/30 bg-signal/10 px-2 py-0.5 font-mono text-[11px] text-signal">
                   {award.level}
                 </span>
               ) : null}
@@ -37,7 +37,7 @@ export function Awards() {
         ))}
 
         {academic?.note ? (
-          <article className="card border-accent/30 bg-accent/[0.06] p-5">
+          <article className="bg-accent/[0.06] p-5">
             <span className="label-mono">{labels.academic}</span>
             <p className="mt-3 font-mono text-[22px] leading-8 text-accent">{academic.note}</p>
             <p className="mt-2 text-[12px] leading-5 text-faint">
