@@ -12,7 +12,7 @@
       },
       {
         "title": "工程习惯",
-        "desc": "偏好把效果写进指标：一次通过率、TopK 命中率、首字延迟都要可测量、可回归。"
+        "desc": "偏好把效果写进指标：一次通过率、检索命中率、首字延迟都要可测量、可回归。"
       }
     ],
     "philosophy": [
@@ -42,7 +42,7 @@
       },
       {
         "topic": "分布式事务与分库分表",
-        "note": "简历上只到「了解」。计划从 Seata 的 AT 模式入手，再补一次真实的分库分表改造。",
+        "note": "目前只有单库经验。计划从 Seata 的 AT 模式入手，再补一次真实的分库分表改造。",
         "status": "计划中"
       }
     ]
@@ -51,30 +51,31 @@
     {
       "group": "后端与框架",
       "tier": "CORE",
-      "note": "问答机器人（会话上下文、多条件联查）与知行食光（鉴权切面、下单扣库存）。",
+      "note": "问答机器人（会话上下文、多条件联查）与知行邻里（秒杀、通用查询组件）。",
       "tags": [
         { "name": "Java 集合与并发", "level": 4, "scene": "问答机器人 · 会话上下文状态" },
         { "name": "HashMap / ConcurrentHashMap", "level": 4, "scene": "本地缓存选型" },
         { "name": "线程池 · AQS · CAS", "level": 3, "scene": "DataAgent · Java 侧异步链路" },
         { "name": "Spring Boot", "level": 4, "scene": "问答机器人 · 服务主框架" },
         { "name": "MyBatis / MyBatis-Plus", "level": 4, "scene": "问答机器人 · 多条件联查" },
-        { "name": "Spring IOC / AOP", "level": 3, "scene": "知行食光 · 统一鉴权切面" },
-        { "name": "声明式事务", "level": 3, "scene": "知行食光 · 下单扣库存原子性" },
+        { "name": "Spring IOC / AOP", "level": 3, "scene": "知行邻里 · 角色权限拦截" },
+        { "name": "声明式事务", "level": 3, "scene": "知行邻里 · 秒杀扣券一致性" },
         { "name": "JVM 内存与 GC", "level": 2, "scene": "线上问题排查" }
       ]
     },
     {
       "group": "数据与中间件",
       "tier": "DATA",
-      "note": "问答机器人 · 万级会话的慢 SQL 与热点缓存；知行食光 · Redisson 库存并发。",
+      "note": "问答机器人 · 十万级联查的慢 SQL；知行邻里 · 秒杀与 GEO/BitMap。",
       "tags": [
-        { "name": "MySQL 索引与执行计划", "level": 4, "scene": "问答机器人 · 万级会话慢 SQL 优化" },
-        { "name": "事务隔离级别", "level": 3, "scene": "知行食光 · 下单与库存一致性" },
+        { "name": "MySQL 索引与执行计划", "level": 4, "scene": "问答机器人 · 十万级联查 1.2s→10ms" },
+        { "name": "事务隔离级别", "level": 3, "scene": "知行邻里 · 秒杀扣券一致性" },
         { "name": "Redis 缓存穿透/击穿/雪崩", "level": 4, "scene": "问答机器人 · 热点数据缓存" },
-        { "name": "Redis 分布式锁", "level": 3, "scene": "知行食光 · Redisson 库存并发" },
+        { "name": "Redis 分布式锁", "level": 3, "scene": "知行邻里 · Redisson 秒杀一人一单" },
+        { "name": "Lua 脚本原子性", "level": 3, "scene": "知行邻里 · 秒杀防超卖" },
+        { "name": "Redis GEO / BitMap", "level": 3, "scene": "知行邻里 · 附近商户与签到" },
         { "name": "布隆过滤器", "level": 2, "scene": "缓存穿透前置校验" },
-        { "name": "RabbitMQ", "level": 2, "scene": "服务异步解耦" },
-        { "name": "分库分表 · 主从同步", "level": 2, "scene": "数据量增长后的扩展方案" }
+        { "name": "RabbitMQ", "level": 2, "scene": "服务异步解耦" }
       ]
     },
     {
@@ -96,13 +97,13 @@
     {
       "group": "RAG 与向量检索",
       "tier": "RAG",
-      "note": "DataAgent · ES 双路召回 + RRF（k=60）融合，TopK 命中 61%→79%。",
+      "note": "DataAgent · ES 向量 + BM25 双路召回，RRF（k=60）融合后经能力回源接口供决策层调用。",
       "tags": [
         { "name": "文档切分策略", "level": 3, "scene": "DataAgent · TextSplitter 切片" },
         { "name": "向量 + BM25 混合检索", "level": 4, "scene": "DataAgent · ES 双路召回" },
-        { "name": "RRF 融合排序", "level": 4, "scene": "DataAgent · K=60，TopK 61%→79%" },
+        { "name": "RRF 融合排序", "level": 4, "scene": "DataAgent · K=60 融合" },
         { "name": "ElasticSearch 向量入库", "level": 3, "scene": "DataAgent · 能力回源接口" },
-        { "name": "RAG 评测集设计", "level": 3, "scene": "N=120 评测集，一次通过率 74%→91%" }
+        { "name": "RAG 评测集设计", "level": 3, "scene": "DataAgent · 离线评测集回归" }
       ]
     },
     {
@@ -114,8 +115,7 @@
         { "name": "Kubernetes 日志排查", "level": 3, "scene": "问答机器人 · 线上异常定位" },
         { "name": "Nacos", "level": 3, "scene": "问答机器人 · 注册与配置中心" },
         { "name": "Git / Linux", "level": 4, "scene": "日常开发与部署" },
-        { "name": "MinIO", "level": 2, "scene": "问答机器人 · 文档流式上传" },
-        { "name": "WebSocket", "level": 3, "scene": "知行食光 · 订单状态推送" }
+        { "name": "MinIO", "level": 2, "scene": "问答机器人 · 文档流式上传" }
       ]
     }
   ],
@@ -139,25 +139,10 @@
         "mermaid": "flowchart TB\n  CH[\"钉钉 / 微信公众号<br/>双渠道接入\"] --> GW[\"消息接入与鉴权<br/>SpringBoot · Nacos\"]\n  GW --> NLU[\"意图识别<br/>多轮状态 · 槽位补全\"]\n  NLU -->|知识问答| PM[\"权限过滤<br/>部门 / 岗位 / 角色\"]\n  NLU -->|闲聊等其他| GEN[\"大模型生成\"]\n  PM --> RAG[\"知识检索<br/>RAGFlow / WeKnora\"]\n  RAG --> GEN\n  NLU -.->|无法解答| HITL[\"人工兜底<br/>钉钉待办派单\"]\n  GEN --> OUT[\"SSE 流式推送<br/>Token 级 + 文档来源<br/>回传原渠道\"]\n  KB[(\"知识文档<br/>MinIO → WeKnora\")] -.-> RAG"
       },
       "metrics": [
-        { "label": "接入渠道", "value": "2 个" },
-        { "label": "单表数据量级", "value": "万级会话" },
-        { "label": "回复时延", "value": "Token 级" },
+        { "label": "慢查询", "value": "1.2s → 10ms" },
+        { "label": "接入渠道", "value": "钉钉 / 公众号" },
+        { "label": "会话量级", "value": "月均十万" },
         { "label": "兜底链路", "value": "钉钉待办" }
-      ],
-      "features": [
-        "对接意图识别与 RAG 知识库，搭建「识别 → 检索 → 生成」完整问答链路",
-        "按部门、岗位、角色多属性校验，隔离检索范围与生成内容权限",
-        "封装 OkHttp 实现 SSE 流式对话，Token 级实时推送并回传文档来源",
-        "支持意图系统与 RAGFlow 双模式动态切换，按场景选择应答策略",
-        "解析多轮对话状态，处理意图切换、槽位补全与澄清追问",
-        "实现 Human-in-the-Loop 兜底，无法解答时自动创建钉钉待办通知管理员",
-        "封装 MinIO → WeKnora 流式上传，文件全程服务端不落盘"
-      ],
-      "engineering": [
-        "编写复杂多条件联查 SQL，调整查询条件并新增高频字段索引，完成慢查询优化",
-        "支撑万级会话数据查询与报表导出，覆盖多类企业咨询场景",
-        "通过 K8s 容器日志定位线上业务异常，排查服务间鉴权调用故障",
-        "参与开发、测试多环境构建与发版流程，完成跨服务接口联调验证"
       ]
     }
   },
@@ -165,15 +150,16 @@
     "_comment": "以简历中的项目名为 key 覆盖字段（features / metrics / architecture / links）；extra 数组里可以手写简历里没有的新项目，字段：name(必填) / role / subtitle / period / summary / features / metrics / stackGroups / architecture / links。",
     "extra": [],
     "DataAgent": {
+      "role": "Java 后端 / Agent 应用开发（个人项目）",
       "architecture": {
         "caption": "双服务架构：Java 事实层负责权限与执行，Python 决策层负责编排与推理",
         "mermaid": "flowchart LR\n  U[用户提问] --> GW[\"Java 网关<br/>Reactor + SSE\"]\n  GW --> AG[\"Python 决策层<br/>LangGraph StateGraph\"]\n  AG --> P1[意图理解]\n  P1 --> P2[Schema 发现]\n  P2 --> P3[多步规划]\n  P3 --> EX[SQL / Python 执行]\n  EX --> CK[语义校验]\n  CK --> RP[报告生成]\n  RP --> GW\n  AG -.-> RAG[\"ES 混合检索<br/>向量 + BM25 + RRF\"]\n  EX -.-> DB[(MySQL 只读库)]"
       }
     },
-    "知行食光": {
+    "知行邻里": {
       "architecture": {
-        "caption": "订单链路：下单 → 扣库存 → WebSocket 状态回推，报表异步导出",
-        "mermaid": "flowchart TB\n  C[\"学生端 / 商家端\"] --> API[\"SpringBoot 服务\"]\n  API --> RD[(Redis 库存锁)]\n  API --> DB[(MySQL 订单)]\n  API --> WS[\"WebSocket<br/>订单状态回推\"]\n  API --> POI[POI 报表导出]"
+        "caption": "秒杀走 Redisson 可重入锁 + Lua 保原子，附近商户、签到与热点缓存都在 Redis 侧，订单落 MySQL",
+        "mermaid": "flowchart TB\n  C[\"学生端 / 商家端\"] --> API[\"Spring Boot 服务<br/>MyBatis-Plus · JWT 拦截器\"]\n  API --> SK[\"优惠券秒杀<br/>Redisson 可重入锁 + Lua\"]\n  SK --> RD[(\"Redis<br/>库存 / 一人一单\")]\n  SK --> DB[(\"MySQL<br/>订单\")]\n  API --> GEO[\"附近商户<br/>GEO 距离排序\"]\n  API --> BM[\"签到<br/>BitMap\"]\n  API --> HOT[\"热点商户缓存\"]\n  API --> Q[\"通用查询组件<br/>条件构造器\"]\n  GEO --> RD\n  BM --> RD\n  HOT --> RD"
       }
     }
   },

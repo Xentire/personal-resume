@@ -353,8 +353,8 @@ const baseInternships: Internship[] = Array.isArray(root.internships)
       return {
         name,
         company,
-        role: text(row.role),
-        subtitle: text(row.subtitle),
+        role: text(override.role) ?? text(row.role),
+        subtitle: text(override.subtitle) ?? text(row.subtitle),
         period: text(row.period),
         stackGroups: stackGroups(row.stackGroups),
         summary: text(row.summary),
@@ -379,8 +379,8 @@ const baseProjects: Project[] = Array.isArray(root.projects)
       const overrideFeatures = list(override.features);
       return {
         name,
-        role: text(row.role),
-        subtitle: text(row.subtitle),
+        role: text(override.role) ?? text(row.role),
+        subtitle: text(override.subtitle) ?? text(row.subtitle),
         period: text(row.period),
         stackGroups: stackGroups(row.stackGroups),
         summary: text(row.summary),

@@ -159,6 +159,11 @@ function parseProfile(headerLines, fullText) {
     const nameMatch = line.match(/姓\s*名[：:]\s*([\u4e00-\u9fff·]{2,10})/);
     if (nameMatch && !profile.name) profile.name = nameMatch[1];
 
+    // 没有「姓名：」标签时（新版版式把名字单独放首行），取第一条纯中文 2-4 字短行
+    if (!profile.name && /^[\u4e00-\u9fff·]{2,4}$/.test(line) && !SECTION_KEYS.includes(line)) {
+      profile.name = line;
+    }
+
     const gender = line.match(/(?:^|[^性格])?(男|女)(?:\s*\|)/);
     if (gender && !profile.gender) profile.gender = gender[1];
 
@@ -180,11 +185,12 @@ function parseProfile(headerLines, fullText) {
 
   const linkPatterns = {
     github: /(?:https?:\/\/)?(?:www\.)?github\.com\/[A-Za-z0-9-_./]+/i,
-    blog: /(?:https?:\/\/)?(?:www\.)?[\w-]+\.(?:com|cn|me|dev|io)\/[A-Za-z0-9-_./]*/i,
+    // 必须带协议：否则 `xxx.pages.dev/` 会被截成 `pages.dev/` 这种假地址
+    blog: /https?:\/\/(?:www\.)?(?:[\w-]+\.)+(?:com|cn|me|dev|io|app|site|xyz|top|net)(?:\/[A-Za-z0-9-_./?=&%]*)?/i,
   };
   for (const [key, re] of Object.entries(linkPatterns)) {
     const hit = fullText.match(re);
-    if (hit) profile.links[key] = hit[0];
+    if (hit && hit[0] !== profile.links.github) profile.links[key] = hit[0];
   }
 
   profile.roleShort = profile.targetRole
@@ -196,39 +202,44 @@ function parseProfile(headerLines, fullText) {
 
 function parseEducation(lines) {
   const education = [];
-  let i = 0;
-  while (i < lines.length) {
+  for (let i = 0; i < lines.length; i += 1) {
     const line = lines[i];
     const schoolMatch = line.match(
       /^(\S+?(?:大学|学院|学校|University|College))\s+(\S+)\s+(\S+?)(?:\s+(\d{4}\s*[-–—~至]\s*\d{4}(?:\.\d{1,2})?))?$/
     );
-    if (schoolMatch) {
-      const entry = {
-        school: schoolMatch[1],
-        degree: schoolMatch[2],
-        major: schoolMatch[3],
-        period: schoolMatch[4] ? schoolMatch[4].replace(/\s+/g, '').replace(/[–—~至]/, '-') : null,
-        highlights: [],
-        note: null,
-      };
-      if (!entry.period) {
-        const next = lines[i + 1] ?? '';
-        const period = next.match(/(\d{4}\s*[-–—~至]\s*\d{4})/);
-        if (period) entry.period = period[1].replace(/\s+/g, '').replace(/[–—~至]/, '-');
+    if (!schoolMatch) continue;
+
+    const entry = {
+      school: schoolMatch[1],
+      degree: schoolMatch[2],
+      major: schoolMatch[3],
+      period: schoolMatch[4] ? schoolMatch[4].replace(/\s+/g, '').replace(/[–—~至]/, '-') : null,
+      highlights: [],
+      note: null,
+    };
+
+    // 时间可能写在上一行（新版版式：时间行在院校行之前），也可能在下一行
+    if (!entry.period) {
+      for (const probe of [lines[i - 1] ?? '', lines[i + 1] ?? '']) {
+        const hit = probe.match(/(\d{4})\s*[-–—~至]\s*(\d{4})/);
+        if (hit) {
+          entry.period = `${hit[1]}-${hit[2]}`;
+          break;
+        }
       }
-      const nextLine = lines[i + 1] ?? '';
-      const percent = nextLine.match(/专业前\s*\d+(?:\.\d+)?%/);
-      if (percent) {
-        entry.note = percent[0].replace(/\s+/g, ' ');
-        const rest = nextLine.split(/[|｜]/).slice(1).join(' ').trim();
-        if (rest) entry.highlights.push(rest);
-        i += 2;
-        education.push(entry);
-        continue;
-      }
-      education.push(entry);
     }
-    i += 1;
+
+    // 专业排名与荣誉可能紧跟在院校行下面一两行
+    for (const probe of [lines[i + 1] ?? '', lines[i + 2] ?? '']) {
+      const percent = probe.match(/专业前\s*\d+(?:\.\d+)?%/);
+      if (!percent) continue;
+      entry.note = percent[0].replace(/\s+/g, ' ');
+      const rest = probe.split(/[|｜]/).slice(1).join(' ').trim();
+      if (rest) entry.highlights.push(rest);
+      break;
+    }
+
+    education.push(entry);
   }
   return education;
 }
@@ -294,6 +305,10 @@ function parseEntries(lines, kind) {
   let bucket = null;
   let buffer = [];
   let stackOpen = false;
+  /** 新版版式把时间单独放一行、且写在标题之前，所以先存起来等条目开始再挂上去 */
+  let pendingPeriod = null;
+  /** 独占一行的时间区间：2026.03-2026.09 */
+  const PERIOD_ONLY_RE = /^(\d{4}[.\-/]\d{1,2})\s*[-–—~至]\s*(\d{4}[.\-/]\d{1,2}|至今|今)$/;
 
   const commit = () => {
     if (!entry) return;
@@ -351,21 +366,45 @@ function parseEntries(lines, kind) {
           .filter(Boolean);
         if (entry.company) {
           entry.subtitle = parts.join(' · ') || null;
+        } else if (kind === 'project' && !/(开发|工程师|实习|负责人|设计|算法|前端|后端|全栈|研究)/.test(parts[0] ?? '')) {
+          // 项目标题后面多半是「副标题」而不是角色（例：「DataAgent」 智能数据分析 Agent 平台）
+          entry.subtitle = parts.join(' · ') || null;
         } else {
           entry.role = parts[0] ?? null;
           entry.subtitle = parts.slice(1).join(' · ') || null;
         }
       }
+      if (!entry.period && pendingPeriod) {
+        entry.period = pendingPeriod;
+        pendingPeriod = null;
+      }
+      continue;
+    }
+
+    // 独占一行的时间区间：挂到当前条目，或先存着等下一个条目
+    const periodOnly = line.match(PERIOD_ONLY_RE);
+    if (periodOnly) {
+      const period = `${periodOnly[1]}–${periodOnly[2]}`;
+      if (entry && !entry.period) entry.period = period;
+      else pendingPeriod = period;
       continue;
     }
 
     if (kind === 'internship') {
-      const companyLine = line.match(/^(.+?(?:公司|集团|工作室|研究院|实验室|中心))\s+(\S.*?)\s+(\d{4}[.\-/]\d{1,2})\s*[-–—~至]\s*(\d{4}[.\-/]\d{1,2}|至今|今)\s*$/);
+      const companyLine = line.match(/^(.+?(?:公司|集团|工作室|研究院|实验室|中心|事业部|银行))\s+(\S.*)$/);
       if (companyLine) {
         startEntry();
         entry.company = companyLine[1].trim();
-        entry.role = companyLine[2].trim();
-        entry.period = `${companyLine[3]}–${companyLine[4]}`;
+        let rest = companyLine[2].trim();
+        const period = rest.match(/(\d{4}[.\-/]\d{1,2})\s*[-–—~至]\s*(\d{4}[.\-/]\d{1,2}|至今|今)/);
+        if (period) {
+          entry.period = `${period[1]}–${period[2]}`;
+          rest = rest.replace(period[0], '').trim();
+        } else if (pendingPeriod) {
+          entry.period = pendingPeriod;
+          pendingPeriod = null;
+        }
+        entry.role = rest || null;
         continue;
       }
     }
@@ -388,11 +427,11 @@ function parseEntries(lines, kind) {
       buffer = rest ? [rest] : [];
       continue;
     }
-    if (/^项目描述[：:]?/.test(line)) {
+    if (/^(?:项目描述|项目简介|实习简介|岗位简介|工作内容)[：:]?/.test(line)) {
       commit();
       bucket = 'summary';
       stackOpen = false;
-      const rest = line.replace(/^项目描述[：:]?\s*/, '');
+      const rest = line.replace(/^(?:项目描述|项目简介|实习简介|岗位简介|工作内容)[：:]?\s*/, '');
       buffer = rest ? [rest] : [];
       continue;
     }
@@ -415,7 +454,22 @@ function parseEntries(lines, kind) {
     if (/^\s*[-–—•·●○]\s*/.test(line)) {
       commit();
       buffer = [line.replace(BULLET_RE, '')];
-      bucket = bucket ?? 'features';
+      // 「项目描述」后面直接跟「- 」列表时，这些列表项是要点而不是描述的续行
+      bucket = 'features';
+      continue;
+    }
+
+    /**
+     * 领句式要点：「问答链路：……」「架构与编排：……」。
+     * 新版简历不用「-」项目符号，靠 3–10 字的标签加冒号起条；标签一并保留，
+     * 因为站点里这条要点本身就是「标签 + 说明」的写法。
+     */
+    const labelled = line.match(/^([\u4e00-\u9fffA-Za-z][\u4e00-\u9fffA-Za-z0-9+\-·/ ]{1,9})[：:]\s*(.+)$/);
+    if (labelled) {
+      commit();
+      bucket = 'features';
+      stackOpen = false;
+      buffer = [line];
       continue;
     }
 
@@ -448,6 +502,12 @@ function parseStackGroups(stackText) {
       label = labelled[1].trim();
       body = labelled[2].trim();
     }
+    // 「Java 侧 Spring AI、WebFlux…」这种没有冒号的分层写法（折行拼接后可能没有空格）
+    const sideLead = body.match(/^(Java|Python|Go|前端|后端|服务端|客户端)\s*[侧层]\s*(.+)$/);
+    if (sideLead) {
+      label = `${sideLead[1]} 侧`;
+      body = sideLead[2].trim();
+    }
     const tail = body.match(/[（(]([^）)]{1,10}(?:侧|层))[）)]\s*$/);
     if (tail) {
       label = tail[1].trim();
@@ -476,10 +536,14 @@ function extractMetrics(texts) {
   for (const raw of texts) {
     const text = raw.replace(/\s+/g, ' ');
 
-    for (const m of text.matchAll(/([^\d，。；:：]{2,16}?)\s*(?:由|从)?\s*(\d+(?:\.\d+)?%?)\s*(?:→|->|—>)\s*(\d+(?:\.\d+)?%?)/g)) {
+    // 带单位的耗时改进：1.2s→10ms / 220ms→65ms（必须放在纯数字规则之前）
+    for (const m of text.matchAll(/([^\d，。；:：]{2,24}?)\s*(?:由|从)?\s*(\d+(?:\.\d+)?\s*(?:ms|s|秒|%))\s*(?:→|->|—>)\s*(\d+(?:\.\d+)?\s*(?:ms|s|秒|%))/g)) {
+      push(m[1], `${m[2].replace(/\s+/g, '')} → ${m[3].replace(/\s+/g, '')}`);
+    }
+    for (const m of text.matchAll(/([^\d，。；:：]{2,24}?)\s*(?:由|从)?\s*(\d+(?:\.\d+)?%?)\s*(?:→|->|—>)\s*(\d+(?:\.\d+)?%?)/g)) {
       push(m[1], `${m[2]} → ${m[3]}`);
     }
-    for (const m of text.matchAll(/([^\d，。；:：]{2,16}?)\s*(?:由|从)?\s*(\d+(?:\.\d+)?%?)\s*(?:提升至|提升到|压缩到|压缩至|降至|降为|降到)\s*(\d+(?:\.\d+)?%?)/g)) {
+    for (const m of text.matchAll(/([^\d，。；:：]{2,24}?)\s*(?:由|从)?\s*(\d+(?:\.\d+)?%?)\s*(?:提升至|提升到|压缩到|压缩至|降至|降为|降到)\s*(\d+(?:\.\d+)?%?)/g)) {
       push(m[1], `${m[2]} → ${m[3]}`);
     }
     for (const m of text.matchAll(/([^\d，。；:：]{2,12}?)\s*(?:由|从)?\s*(\d+\s*[-–]\s*\d+\s*[天周月])\s*(?:压缩到|缩短到|压缩至|降至|降到)\s*(\d+\s*[分钟秒时天]+)/g)) {

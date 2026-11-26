@@ -1,8 +1,8 @@
 {
   "meta": {
-    "source": "简历-大三2026-11-20.pdf",
+    "source": "简历-大三2026-11-26.pdf",
     "pages": 2,
-    "syncedAt": "2026-11-20T03:27:06.562Z"
+    "syncedAt": "2026-11-26T10:33:46.696Z"
   },
   "profile": {
     "name": "徐维宇",
@@ -12,10 +12,10 @@
     "email": "13676459981@163.com",
     "targetRole": "后端开发（Agent / RAG 应用方向）",
     "location": null,
-    "summary": "湖北大学软件工程在读（专业前15%），技能覆盖后端与框架、AI应用与Agent，实习于纬致芯创科技（武汉）有限公司，主要实践：DataAgent / 知行食光。",
+    "summary": "湖北大学软件工程在读（专业前15%），技能覆盖语言与框架、AI 与 RAG，实习于纬致芯创科技（武汉）有限公司，主要实践：DataAgent / 知行邻里。",
     "links": {
       "github": null,
-      "blog": "pages.dev/",
+      "blog": "https://personal-resume-8n1.pages.dev/",
       "wechat": null
     },
     "roleShort": "后端开发",
@@ -54,19 +54,11 @@
   ],
   "skills": [
     {
-      "group": "后端与框架",
+      "group": "语言与框架",
       "items": [
         {
-          "level": "掌握",
-          "text": "Java 集合与并发编程、HashMap/ConcurrentHashMap 底层与扩容、线程池、AQS、CAS、ThreadLocal、volatile"
-        },
-        {
-          "level": "掌握",
-          "text": "Spring Boot、MyBatis/MyBatis-Plus、Spring IOC/AOP、事务传播"
-        },
-        {
-          "level": "了解",
-          "text": "JVM 内存与 GC"
+          "level": null,
+          "text": "Java 集合与并发（HashMap/ConcurrentHashMap、线程池、AQS、CAS、ThreadLocal）、Spring Boot、MyBatis-Plus、Spring IOC/AOP"
         }
       ]
     },
@@ -74,55 +66,29 @@
       "group": "数据与中间件",
       "items": [
         {
-          "level": "掌握",
-          "text": "MySQL 索引、事务隔离、慢SQL调优"
+          "level": null,
+          "text": "MySQL 索引/慢 SQL 调优、Redis 缓存穿透·击穿·雪崩/分布式锁/布隆过滤器、RabbitMQ"
         },
         {
-          "level": "掌握",
-          "text": "Redis 缓存穿透/击穿/雪崩、分布式锁、布隆过滤器"
-        },
-        {
-          "level": "了解",
-          "text": "分库分表、主从同步、RabbitMQ 交换机模式与异步解耦"
+          "level": null,
+          "text": "Git/Linux/Docker、K8s 日志排查、MinIO"
         }
       ]
     },
     {
-      "group": "AI应用与Agent",
+      "group": "AI 与 RAG",
       "items": [
         {
-          "level": "掌握",
-          "text": "Python、LangGraph、ReAct、Reflection、Plan-and-Execute、SSE 流式输出、Human-in-the-Loop、MCP 协议、Prompt 设计原则、Harness Engineering等AI工程实践"
+          "level": null,
+          "text": "Python、LangGraph、ReAct/Plan-and-Execute、Prompt 设计、SSE、Human-in-the-Loop、MCP"
         },
         {
-          "level": "熟悉",
-          "text": "SpringAI、FastAPI"
-        }
-      ]
-    },
-    {
-      "group": "RAG与向量检索",
-      "items": [
-        {
-          "level": "掌握",
-          "text": "RAG 流程设计，包括文档切分、向量+BM25 混合检索、RRF 融合召回、ElasticSearch 向量入库"
-        }
-      ]
-    },
-    {
-      "group": "工程工具",
-      "items": [
-        {
-          "level": "熟练",
-          "text": "Git、Linux、Docker"
+          "level": null,
+          "text": "Spring AI、FastAPI"
         },
         {
-          "level": "熟悉",
-          "text": "Nacos 服务注册与配置、K8s 日志排查与多环境联调"
-        },
-        {
-          "level": "了解",
-          "text": "MinIO"
+          "level": null,
+          "text": "文档切分、向量 + BM25 混合检索、RRF 融合"
         }
       ]
     }
@@ -132,103 +98,90 @@
       "name": "智能问答机器人",
       "company": "纬致芯创科技（武汉）有限公司",
       "role": "JAVA后端开发实习生",
-      "subtitle": "Java后端开发 · Agent应用与RAG知识库问答",
+      "subtitle": "Agent 应用与 RAG 知识库问答",
       "period": "2026.03–2026.09",
       "stackGroups": [
         {
           "label": null,
           "items": [
-            "SpringBoot",
+            "Spring Boot",
             "MyBatis",
             "MySQL",
             "Redis",
             "MinIO",
-            "Nacos",
             "SSE",
             "RAGFlow",
             "WeKnora",
-            "钉钉开放平台",
-            "微信公众号"
+            "钉钉/公众号"
           ]
         }
       ],
       "stack": [
-        "SpringBoot",
+        "Spring Boot",
         "MyBatis",
         "MySQL",
         "Redis",
         "MinIO",
-        "Nacos",
         "SSE",
         "RAGFlow",
         "WeKnora",
-        "钉钉开放平台",
-        "微信公众号"
+        "钉钉/公众号"
       ],
-      "summary": "面向企业员工自助问答的智能问答机器人后端，对接钉钉、公众号双渠道，基于意图识别与RAG检索增强生成，覆盖人事、行政、财务、IT等多类企业咨询问题；支持多轮对话、人工兜底与检索权限隔离，构建人机协作问答闭环。",
+      "summary": "面向企业员工自助问答，对接钉钉/公众号双渠道，覆盖人事、行政、财务、IT 等咨询。",
       "features": [
-        "对接意图识别与RAG知识库底座构建问答链路，基于员工部门、岗位、角色多属性校验，实现检索范围与生成内容的权限隔离",
-        "封装OkHttp实现SSE流式对话，完成LLM回复Token级实时推送与文档来源回传，支持意图系统与RAGFlow双模式动态切换",
-        "解析意图识别返回的多轮对话状态，处理意图切换、槽位补全、澄清追问，驱动对话策略保障会话上下文一致性",
-        "实现Human-in-the-Loop人工兜底机制，机器人无法解答时自动创建钉钉待办推送管理员介入",
-        "封装MinIO到WeKnora的流式上传链路，文件全程服务端不落盘，支撑文档批量入库与知识库访问管控"
+        "问答链路：意图识别 + RAG，按部门/岗位/角色过滤检索，生成只基于有权限的文档；多轮状态解析（意图切换 / 槽位补全 /澄清追问）；无解时创建钉钉待办转人工",
+        "流式与路由：OkHttp 消费上游 SSE 并转发，Token 级推送 + 文档来源回传；意图系统 / RAGFlow 双模式切换，意图命中率95%",
+        "知识库：MinIO→WeKnora 流式上传，文件服务端不落盘，支撑多库批量入库与访问管控",
+        "工程优化：十万级多条件联查优化（条件调整 + 高频字段索引）1.2s→10ms，支撑万级员工、月均十万级会话；K8s 日志定位服务间鉴权异常"
       ],
-      "engineering": [
-        "编写复杂多条件联查SQL，通过调整查询条件、新增高频字段索引完成慢查询优化，支撑万级员工、月均十万级会话数据的多条件联查与报表导出",
-        "通过K8s容器日志定位线上业务异常，排查服务间鉴权调用故障，参与开发、测试多环境构建与发版流程",
-        "完成跨服务接口联调，在K8s开发环境部署验证接口逻辑"
-      ]
+      "engineering": []
     }
   ],
   "projects": [
     {
       "name": "DataAgent",
       "company": null,
-      "role": "AIAgent应用后端开发",
-      "subtitle": "多agent智能数据分析平台",
+      "role": null,
+      "subtitle": "智能数据分析 Agent 平台",
       "period": "2026.08–2026.11",
       "stackGroups": [
         {
-          "label": "Java 网关侧",
+          "label": "Java 侧",
           "items": [
-            "SpringAI（向量侧）",
-            "SpringBoot-WebFlux",
+            "Spring AI（向量侧）",
+            "WebFlux",
             "Reactor",
             "SSE",
             "MyBatis",
             "MySQL",
-            "Redis",
-            "ElasticSearch",
-            "Docker"
+            "Elasticsearch"
           ]
         },
         {
-          "label": "决策层",
+          "label": "Python 侧",
           "items": [
             "LangGraph",
-            "Python"
+            "Redis（checkpoint/会话）"
           ]
         }
       ],
       "stack": [
-        "SpringAI（向量侧）",
-        "SpringBoot-WebFlux",
+        "Spring AI（向量侧）",
+        "WebFlux",
         "Reactor",
         "SSE",
         "MyBatis",
         "MySQL",
-        "Redis",
-        "ElasticSearch",
-        "Docker",
+        "Elasticsearch",
         "LangGraph",
-        "Python"
+        "Redis（checkpoint/会话）"
       ],
-      "summary": "面向企业数据库自助分析场景，解决非技术业务人员\"有数据需求但依赖开发排期\"的效率痛点。系统接收自然语言提问，自主完成意图理解、Schema发现、多步规划、SQL/Python混合执行、报告生成的完整闭环，替代\"提需求→等排期→开发写SQL\"的低效流程，常规取数由 3–5 天压缩到 5 分钟内。重构为 Java 事实层（权限/数据/SQL 执行）+ Python 决策层（编排/推理）双服务架构，以自定义线协议与 7 个能力回源接口解耦，Java 侧较重构前净减 60 个文件，SQL 执行入口收敛为 1 个签名校验门面。",
+      "summary": "面向企业数据库自助分析，业务人员自然语言提问，系统完成 Schema 发现、SQL/Python 执行与报告生成，替代“提需求→等排期→开发写 SQL”，常规取数从 3–5 天降到 5 分钟内（自建样例库实测，含一次确认）。",
       "features": [
-        "负责 Python 决策层 StateGraph 编排（17 节点 / 4 阶段：理解 6 · 计划 4 · 执行 6 · 交付 1 = 17，覆盖意图识别→RAG 召回→Schema 发现→多步规划→SQL/Python 混合执行→语义校验→报告 7 个环节），采用 Plan-and-Execute 而非 ReAct 保证路径与成本可控；设计划修复环、SQL 重试环、Python 重试环 3 个独立重试环并设递归上限60，修复重试预算跨步泄漏后，多步计划的校验覆盖率由 20% 提升至 100%",
-        "设计三层自省质量体系：计划层结构校验回退重规划、SQL 层多轮重试、语义层检测 SQL 与 Schema 冲突并携带错误上下文修复；另加零 token 成本的纯函数机械校验，拦截同比基期截断、缺失补零两类静默错数，SQL 一次通过率 74%→91%（N=120 评测集）",
-        "负责 Java 侧 Reactor + SSE 流式链路：token 级推送、报告边生成边渲染，首字 P95 ≤3s（原需等整篇生成完）；心跳与空闲超时分层、存活判定前移至协议翻译之前，长耗时节点误杀降为 0；与决策层配合实现 HITL：Python 侧 interrupt 断点，Java 侧协议翻译与恢复，执行前暂停确认、反馈后恢复或重新规划，不依赖 checkpoint 内部结构",
-        "落地 Java 侧 ES 混合检索（向量 + BM25）+ RRF 融合（K=60），经能力回源接口供决策层 RAG 调用，TopK 命中率61%→79%；基于 Spring AI 的 EmbeddingModel / TextSplitter / VectorStore 承担知识切分与向量化，模型配置收敛单出口实现运行时热切换、零重启；Docker 容器隔离执行 Python，依赖白名单由基础设施管控，与业务库凭证隔离"
+        "架构与编排：Java 事实层 + Python 决策层双服务（自定义 wire 协议 + 7 个能力回源接口，SQL 入口收敛为单一 HMAC 门面）；决策层 17 节点 / 4 阶段 StateGraph，理解段固定流水线、执行段Plan-and-Execute（非 ReAct），计划可机械校验、可人工确认；3 条重试环 + 2 条非重试回边、60 superstep 硬上限，修复重试预算跨步泄漏（每步独立预算）",
+        "质量与指标：三层自省 + 零 Token 纯函数机械校验，拦截同比基期截断、缺失补零两类静默错数；SQL 首条执行通过率（不含重试）74%→91%",
+        "流式与 HITL：Reactor + SSE Token 级推送、报告边生成边渲染，报告首字符 P95≤3s；心跳/空闲超时分层 + 存活判定前移，降低节点误杀；HITL 由 Python 侧 interrupt 断点、Java 仅持 threadId调用 /resume，不解析 checkpoint 内部结构",
+        "检索与执行隔离：ES 向量 + BM25 + RRF(k=60) 混合检索（默认关闭，需 ES profile 与混合检索开关同时启用）；Python只生成代码，回源 Java 固定 Docker 沙箱（镜像封闭、无业务库凭证）；模型配置单出口热切换（单活、零重启）"
       ],
       "engineering": [],
       "metrics": [
@@ -237,66 +190,55 @@
           "value": "3–5天 → 5分钟"
         },
         {
-          "label": "多步计划的校验覆盖率",
-          "value": "20% → 100%"
-        },
-        {
-          "label": "SQL 一次通过率",
+          "label": "SQL 首条执行通过率（不含重试）",
           "value": "74% → 91%"
         },
         {
-          "label": "首字 P95",
+          "label": "报告首字符 P95",
           "value": "≤3s"
-        },
-        {
-          "label": "TopK 命中率",
-          "value": "61% → 79%"
         }
       ]
     },
     {
-      "name": "知行食光",
+      "name": "知行邻里",
       "company": null,
       "role": "Java后端开发",
-      "subtitle": "前后端联调与AI辅助开发",
+      "subtitle": null,
       "period": "2025.10–2025.12",
       "stackGroups": [
         {
           "label": null,
           "items": [
-            "Claude",
-            "Spring",
-            "Springboot",
-            "Mybatis",
-            "WebSocket",
-            "JWT",
+            "Spring Boot",
+            "MyBatis-Plus",
+            "MySQL",
             "Redis",
-            "MySql",
-            "ApacheECharts"
+            "Redisson",
+            "JWT"
           ]
         }
       ],
       "stack": [
-        "Claude",
-        "Spring",
-        "Springboot",
-        "Mybatis",
-        "WebSocket",
-        "JWT",
+        "Spring Boot",
+        "MyBatis-Plus",
+        "MySQL",
         "Redis",
-        "MySql",
-        "ApacheECharts"
+        "Redisson",
+        "JWT"
       ],
-      "summary": "面向高校师生的智慧餐饮服务系统，基于 SpringBoot + MyBatis 实现，涵盖学生在线点餐、购物车、支付下单、订单状态实时跟踪，以及食堂档口后台的菜品管理、订单处理、运营数据统计、员工管理等功能，解决校园早高峰点餐效率低问题。",
+      "summary": "面向校园周边的本地生活服务系统，前后端分离，覆盖短信登录、商户检索、优惠券秒杀、附近商户、签到、关注、探店。",
       "features": [
-        "基于Redisson可重入锁控制食堂库存并发修改，避免超卖/库存不一致",
-        "WebSocket实现商家接单/订单状态秒级推送，提升用户体验",
-        "Spring声明式事务保障下单-扣库存原子性，避免数据异常",
-        "Apache POI导出月度订单报表，支持按档口/时间维度筛选",
-        "JWT+角色拦截器区分权限，保障接口访问安全"
+        "秒杀：Redisson 可重入锁 + Lua 脚本保证原子性，实现一人一单、防超卖",
+        "Redis：GEO 存储商户坐标做附近距离排序；BitMap 存签到，单用户开销降至 1/3；热点商户缓存使列表接口 220ms→65ms",
+        "查询与权限：封装 MyBatis-Plus 通用查询组件，减少约 80% 重复 SQL；JWT + 角色拦截器区分用户 / 达人 / 商家"
       ],
       "engineering": [],
-      "metrics": []
+      "metrics": [
+        {
+          "label": "热点商户缓存使列表接口",
+          "value": "220ms → 65ms"
+        }
+      ]
     }
   ]
 }

@@ -77,7 +77,7 @@ export function MetricStrip({ metrics, title }: { metrics: Metric[]; title?: str
         {metrics.map((metric) => (
           <div
             key={`${metric.label}-${metric.value}`}
-            className="flex min-w-[132px] flex-1 flex-col rounded-[2px] border border-line bg-elevated px-4 py-3"
+            className="flex min-w-[132px] max-w-[360px] flex-1 flex-col rounded-[2px] border border-line bg-elevated px-4 py-3"
           >
             <span className="font-mono text-[15px] leading-6 tabular-nums text-signal">{metric.value}</span>
             <span className="mt-1 text-[11px] leading-4 text-faint">{metric.label}</span>
